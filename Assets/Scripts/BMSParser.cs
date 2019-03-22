@@ -27,38 +27,42 @@ public class BMSParser : MonoBehaviour {
     public BMSPattern pat { get; private set; }
     private string path;
     private string[] bmsFile { get; set; }
-    private List<float> exBpms;
+    private List<double> exBpms;
 
     private void Awake()
     {
-        exBpms = new List<float>()
+        exBpms = new List<double>()
         {
             Capacity = 3
         };
         sm = GetComponent<SoundManager>();
         path =
-        //"BMSFiles/CrystalWorld/"
-        //"BMSFiles/EndTime/"
-        //"BMSFiles/JackTheRipper/"
-        //"BMSFiles/Halcyon/"
-        //"BMSFiles/YumeLyrith/"
-        //"BMSFiles/EOS_master0906/"
-        //"BMSFiles/Doppelganger_LeaF/"
-        "BMSFiles/Aleph0/"
-        //"BMSFiles/DeadSoul/"    //Decode36 stop
-        ;
+		//"BMSFiles/CrystalWorld/"
+		//"BMSFiles/EndTime/"
+		//"BMSFiles/JackTheRipper/"
+		//"BMSFiles/Halcyon/"
+		//"BMSFiles/YumeLyrith/"
+		//"BMSFiles/EOS_master0906/"
+		//"BMSFiles/Doppelganger_LeaF/"
+		//"BMSFiles/Aleph0/"
+		//"BMSFiles/DeadSoul/"    //Decode36 stop
+		//"BMSFiles/Lots of Spices/"
+		"BMSFiles/Engine/"
+		;
         Init();
         GetFile(Resources.Load<TextAsset>(path +
-            //"_crystal-world_r_7a"
-            //"EndTimeTB"	
-            //"jacktheripper_29a"
-            //"_hal_A"
-            //"_7ANOTHER"
-            //"eos_m"
-            //"_A7"
-            "_7ANOTHER"
-            //"soundsouler_deadsoul_Revive"
-            ));
+			//"_crystal-world_r_7a"
+			//"EndTimeTB"	
+			//"jacktheripper_29a"
+			//"_hal_A"
+			//"_7ANOTHER"
+			//"eos_m"
+			//"_A7"
+			//"_7ANOTHER"
+			//"soundsouler_deadsoul_Revive"
+			//"778_LOSmineds"
+			"engine_XYZ"
+			));
             
         ParseHeader();
         PrintHeader();
@@ -108,7 +112,7 @@ public class BMSParser : MonoBehaviour {
             }
             else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#GENRE") == 0) header.Genre = s.Substring(7);
             else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#TITLE") == 0) header.Title = s.Substring(7);
-            else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#TOTAL") == 0) header.Total = float.Parse(s.Substring(7));
+            else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#TOTAL") == 0) header.Total = double.Parse(s.Substring(7));
             else if (s.Length >= 5 && string.Compare(s.Substring(0, 5), "#RANK") == 0) header.Rank = int.Parse(s.Substring(6));
             else if (s.Length >= 4 && string.Compare(s.Substring(0, 4), "#WAV") == 0)
             {
@@ -132,10 +136,10 @@ public class BMSParser : MonoBehaviour {
             else if (s.Length >= 6 && string.Compare(s.Substring(0, 4), "#BPM") == 0)
             {
                 if (s[4] == ' ')
-                    header.Bpm = float.Parse(s.Substring(5));
+                    header.Bpm = double.Parse(s.Substring(5));
                 else
                 {
-                    float bpm = float.Parse(s.Substring(7));
+					double bpm = double.Parse(s.Substring(7));
                     //Debug.Log(exBpms.Count + "/" + bpm);
                     exBpms.Add(bpm);
                 }
@@ -144,8 +148,13 @@ public class BMSParser : MonoBehaviour {
             {
                 if (s[7] == ' ')
                 {
-                    int stopDuration = int.Parse(s.Substring(8));
-                    pat.StopDurations.Add(stopDuration * 0.005208333333f); // 나누기 192
+					string sub = s.Substring(5, 2);
+                    double stopDuration = int.Parse(s.Substring(8)) / 192.0;
+                    pat.LegacyStopDurations.Add(stopDuration); // 나누기 192
+					if (!pat.StopDurations.ContainsKey(sub))
+					{
+						pat.StopDurations.Add(sub, stopDuration);
+					}
                 }
             }
             else if(s.Length >= 9 && string.Compare(s.Substring(0, 7), "#random") == 0)
@@ -159,7 +168,7 @@ public class BMSParser : MonoBehaviour {
     {
         bool ifBlockOpen = false;
         bool isIfVaild = false;
-        float beatC = 1.0f;
+		double beatC = 1.0f;
 
         foreach(string s in bmsFile)
         {
@@ -168,7 +177,6 @@ public class BMSParser : MonoBehaviour {
 
             if (ifBlockOpen && !isIfVaild)
             {
-                //Debug.Log("skip");
                 continue;
             }
 
@@ -192,8 +200,7 @@ public class BMSParser : MonoBehaviour {
 
             int bar;
 
-            if (!int.TryParse(s.Substring(1, 3), out bar))
-                continue;
+            if (!int.TryParse(s.Substring(1, 3), out bar)) continue;
 
             if (pat.BarCount < bar) pat.BarCount = bar; //나중에 1 더해야함
 
@@ -206,7 +213,6 @@ public class BMSParser : MonoBehaviour {
                 for (int i = 7; i < s.Length - 1; i += 2)
                 {
                     int keySound = Decode36(s.Substring(i, 2));
-                    //Debug.Log(line + "/" + bar + "/" + (i - 7) / 2 + "/" + beatLength + "/" + keySound);
                     if (keySound != 0)
                     {
                         if (header.LnType.HasFlag(BMSHeader.Lntype.LNOBJ) && keySound == header.Lnobj)
@@ -235,7 +241,7 @@ public class BMSParser : MonoBehaviour {
                 }
                 else if (s[5] == '2')
                 {
-                    beatC = float.Parse(s.Substring(7));
+                    beatC = double.Parse(s.Substring(7));
                     pat.AddNewBeatC(bar, beatC);
                 }
                 else if (s[5] == '3')
@@ -243,10 +249,9 @@ public class BMSParser : MonoBehaviour {
                     beatLength = (s.Length - 7) / 2;
                     for (int i = 7; i < s.Length - 1; i += 2)
                     {
-                        float bpm = int.Parse(s.Substring(i, 2), System.Globalization.NumberStyles.HexNumber);
+						double bpm = int.Parse(s.Substring(i, 2), System.Globalization.NumberStyles.HexNumber);
 
-                        if (bpm != 0)
-                            pat.AddBPM(bar, (i - 7) / 2, beatLength, bpm);
+                        if (bpm != 0) pat.AddBPM(bar, (i - 7) / 2, beatLength, bpm);
                     }
                 }
                 else if (s[5] == '4')
@@ -255,8 +260,7 @@ public class BMSParser : MonoBehaviour {
                     for (int i = 7; i < s.Length - 1; i += 2)
                     {
                         int idx = Decode36(s.Substring(i, 2));
-                        if (idx != 0)
-                            pat.AddBGAChange(bar, (i - 7) / 2, beatLength, idx);
+                        if (idx != 0) pat.AddBGAChange(bar, (i - 7) / 2, beatLength, idx);
                     }
                 }
                 else if (s[5] == '8')
@@ -266,10 +270,7 @@ public class BMSParser : MonoBehaviour {
                     for (int i = 7; i < s.Length - 1; i += 2)
                     {
                         int idx = int.Parse(s.Substring(i, 2), System.Globalization.NumberStyles.HexNumber) - 1;
-                        if (idx >= 0)
-                        {
-                            pat.AddBPM(bar, (i - 7) / 2, beatLength, exBpms[idx]);
-                        }
+                        if (idx >= 0) pat.AddBPM(bar, (i - 7) / 2, beatLength, exBpms[idx]);
                     }
                 }
                 else if (s[5] == '9')
@@ -277,15 +278,26 @@ public class BMSParser : MonoBehaviour {
                     beatLength = (s.Length - 7) / 2;
                     for (int i = 7; i < s.Length - 1; i += 2)
                     {
-                        int idx = int.Parse(s.Substring(i, 2), System.Globalization.NumberStyles.HexNumber) - 1;
-                        //Decode36(s.Substring(i, 2)) - 1;
-                        if (idx >= 0)
-                        {
-                            pat.AddStop(bar, (i - 7) / 2, beatLength, idx);
-                        }
+						string sub = s.Substring(i, 2);
+						if (string.Compare(sub, "00") != 0) pat.AddStop(bar, (i - 7) / 2, beatLength, sub);
                     }
                 }
             }
+			else if (s[4] == 'D' || s[4] == 'E')
+			{
+				int line, beatLength;
+				line = s[5] - '1';
+				beatLength = (s.Length - 7) / 2;
+
+				for (int i = 7; i < s.Length - 1; i += 2)
+				{
+					int keySound = Decode36(s.Substring(i, 2));
+					if (keySound != 0)
+					{
+						pat.AddNote(line, bar, (i - 7) / 2, beatLength, keySound, -1);
+					}
+				}
+			}
         }
     }
 

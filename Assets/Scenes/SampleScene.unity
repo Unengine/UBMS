@@ -151,7 +151,7 @@ GameObject:
   - component: {fileID: 99982894}
   - component: {fileID: 99982895}
   m_Layer: 0
-  m_Name: New Sprite (8)
+  m_Name: Lanes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -226,7 +226,7 @@ GameObject:
   - component: {fileID: 329500809}
   - component: {fileID: 329500810}
   m_Layer: 0
-  m_Name: New Sprite (1)
+  m_Name: Lanes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -489,7 +489,7 @@ GameObject:
   - component: {fileID: 452130555}
   - component: {fileID: 452130556}
   m_Layer: 0
-  m_Name: New Sprite (7)
+  m_Name: Lanes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1008,6 +1008,7 @@ MonoBehaviour:
   noteParent: {fileID: 86760153}
   OddNote: {fileID: 21300000, guid: afcb14224bd886749a6c85a5009c3d97, type: 3}
   EvenNote: {fileID: 21300002, guid: afcb14224bd886749a6c85a5009c3d97, type: 3}
+  LandMine: {fileID: 21300004, guid: 4f49f7f38cf6cf548a82f5ff98f52e45, type: 3}
   LongOddNote: {fileID: 21300004, guid: afcb14224bd886749a6c85a5009c3d97, type: 3}
   LongEvenNote: {fileID: 21300006, guid: afcb14224bd886749a6c85a5009c3d97, type: 3}
   LinePrefab: {fileID: 1777984620870182, guid: 04ce389efc51c3041b5baa5c8924b66c, type: 2}
@@ -1271,7 +1272,7 @@ GameObject:
   - component: {fileID: 850856648}
   - component: {fileID: 850856649}
   m_Layer: 0
-  m_Name: New Sprite (2)
+  m_Name: Lanes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1638,7 +1639,7 @@ GameObject:
   - component: {fileID: 1033970691}
   - component: {fileID: 1033970692}
   m_Layer: 0
-  m_Name: New Sprite (10)
+  m_Name: BlackPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1713,7 +1714,7 @@ GameObject:
   - component: {fileID: 1179118026}
   - component: {fileID: 1179118027}
   m_Layer: 0
-  m_Name: New Sprite (5)
+  m_Name: Lanes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1925,7 +1926,7 @@ GameObject:
   - component: {fileID: 1278451399}
   - component: {fileID: 1278451400}
   m_Layer: 0
-  m_Name: New Sprite (6)
+  m_Name: Lanes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2283,7 +2284,7 @@ GameObject:
   - component: {fileID: 1555749018}
   - component: {fileID: 1555749019}
   m_Layer: 0
-  m_Name: New Sprite (9)
+  m_Name: Lanes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2358,7 +2359,7 @@ GameObject:
   - component: {fileID: 1610578361}
   - component: {fileID: 1610578362}
   m_Layer: 0
-  m_Name: New Sprite
+  m_Name: JudgeLine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2433,7 +2434,7 @@ GameObject:
   - component: {fileID: 1646427628}
   - component: {fileID: 1646427629}
   m_Layer: 0
-  m_Name: New Sprite (3)
+  m_Name: Lanes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2583,7 +2584,7 @@ GameObject:
   - component: {fileID: 1869218779}
   - component: {fileID: 1869218780}
   m_Layer: 0
-  m_Name: New Sprite (4)
+  m_Name: Lanes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

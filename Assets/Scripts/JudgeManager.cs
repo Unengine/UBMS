@@ -25,19 +25,21 @@ public class JudgeManager {
         private set { inst = value; }
     }
 
-    public JudgeType Judge(Note n, float currentTime)
-    {
-        float diff = Mathf.Abs(n.Timing - currentTime) * 1000.0f;
-        //Debug.Log($"note : {n.Timing}, currentTime : {currentTime}");
-        if (n.Timing > currentTime && diff >= 220.0f) return JudgeType.IGNORE;
+	public double DAbs(double d) => (d >= 0) ? d : -d;
 
-        if (diff < 21.0f)
+    public JudgeType Judge(Note n, double currentTime)
+    {
+        double diff = DAbs(n.Timing - currentTime) * 1000;
+        //Debug.Log($"note : {n.Timing}, currentTime : {currentTime}");
+        if (n.Timing > currentTime && diff >= 220.0) return JudgeType.IGNORE;
+
+        if (diff < 21.0)
             return JudgeType.PGREAT;
-        else if (diff < 60.0f)
+        else if (diff < 60.0)
             return JudgeType.GREAT;
-        else if (diff < 150.0f)
+        else if (diff < 150.0)
             return JudgeType.GOOD;
-        else if (diff < 220.0f)
+        else if (diff < 220.0)
             return JudgeType.BAD;
         else
             return JudgeType.POOR;

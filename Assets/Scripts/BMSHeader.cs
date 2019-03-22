@@ -14,8 +14,8 @@ public class BMSHeader
     public string Artist { get; set; }
     public string Genre { get; set; }
     public string Title { get; set; }
-    public float Total { get; set; }
-    public float Bpm { get; set; }
+    public double Total { get; set; }
+    public double Bpm { get; set; }
     public int Rank { get; set; }
     public Lntype LnType { get; set; }
     public int Lnobj { get; set; }

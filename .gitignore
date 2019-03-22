@@ -14,9 +14,13 @@
 [Aa]ssets/**/*.ogg
 [Aa]ssets/**/*.mpg
 [Aa]ssets/**/*.wav
+[Aa]ssets/**/*.png
+[Aa]ssets/**/*.bmp
 *ogg*
 *mpg*
 *wav*
+*png*
+*bmp*
 
 
 # Never ignore Asset meta data (no! sound.meta should be ignored)

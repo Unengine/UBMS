@@ -7,7 +7,7 @@ public class BGAChange : BMSObject
 {
     public int Idx { get; set; } = 0;
     public bool isPic;
-    public BGAChange(int bar, int idx, float beat, float beatLength, bool isPic) : base(bar, beat, beatLength)
+    public BGAChange(int bar, int idx, double beat, double beatLength, bool isPic) : base(bar, beat, beatLength)
     {
         Idx = idx;
     }
@@ -25,16 +25,16 @@ public class Line
 public abstract class BMSObject : IComparable<BMSObject>
 {
     public int Bar { get; protected set; }
-    public float Beat { get; protected set; }
-    public float Timing { get; set; }
+    public double Beat { get; protected set; }
+    public double Timing { get; set; }
 
-    public BMSObject(int bar, float beat, float beatLength)
+    public BMSObject(int bar, double beat, double beatLength)
     {
         Bar = bar;
-        Beat = (beat / beatLength) * 4.0f;
+        Beat = (beat / beatLength) * 4.0;
     }
 
-    public void CalculateBeat(float prevBeats, float beatC)
+    public void CalculateBeat(double prevBeats, double beatC)
     {
         Beat = Beat * beatC + prevBeats;
     }
@@ -53,7 +53,7 @@ public class Note : BMSObject
     public int Extra { get; private set; }
     public GameObject model { get; set; }
 
-    public Note(int bar, int keySound, float beat, float beatLength, int extra) : base(bar, beat, beatLength)
+    public Note(int bar, int keySound, double beat, double beatLength, int extra) : base(bar, beat, beatLength)
     {
         KeySound = keySound;
         Extra = extra;
@@ -62,9 +62,9 @@ public class Note : BMSObject
 
 public class BPM : BMSObject
 {
-    public float Bpm { get; private set; }
+    public double Bpm { get; private set; }
 
-    public BPM(int bar, float bpm, float beat, float beatLength) : base(bar, beat, beatLength)
+    public BPM(int bar, double bpm, double beat, double beatLength) : base(bar, beat, beatLength)
     {
         Bpm = bpm;
     }
@@ -72,10 +72,10 @@ public class BPM : BMSObject
 
 public class Stop : BMSObject
 {
-    public int Idx;
-    public Stop(int bar, int idx, float beat, float beatLength) : base(bar, beat, beatLength)
+	public string Key;
+    public Stop(int bar, string key, double beat, double beatLength) : base(bar, beat, beatLength)
     {
-        Idx = idx;
+		Key = key;
     }
 }
 
@@ -87,14 +87,16 @@ public class BMSPattern {
     public List<string> KeySounds { get; set; }
     public List<BPM> Bpms { get; set; }
     public List<Stop> Stops { set; get; }
-    public List<float> StopDurations { get; set; }
-    public Dictionary<int, float> BeatCTable { get; set; }
+    public List<double> LegacyStopDurations { get; set; }
+	public Dictionary<string, double> StopDurations { get; set; }
+    public Dictionary<int, double> BeatCTable { get; set; }
     public Line[] Lines { get; set; }
 
     public BMSPattern()
     {
-        BeatCTable = new Dictionary<int, float>();
-        StopDurations = new List<float>()
+        BeatCTable = new Dictionary<int, double>();
+		StopDurations = new Dictionary<string, double>();
+        LegacyStopDurations = new List<double>()
         {
             Capacity = 5
         };
@@ -124,65 +126,63 @@ public class BMSPattern {
         BGAChanges.Add(new BGAChange(bar, idx, beat, beatLength, isPic));
     }
 
-    public void AddNote(int line, int bar, float beat, float beatLength, int keySound, int extra)
+    public void AddNote(int line, int bar, double beat, double beatLength, int keySound, int extra)
     {
         Lines[line].noteList.Add(new Note(bar, keySound, beat, beatLength, extra));
     }
 
-    public void AddBGSound(int bar, float beat, float beatLength, int keySound)
+    public void AddBGSound(int bar, double beat, double beatLength, int keySound)
     {
         BGSounds.Add(new Note(bar, keySound, beat, beatLength, 0));
     }
 
-    public void AddNewBeatC(int bar, float beatC)
+    public void AddNewBeatC(int bar, double beatC)
     {
         BeatCTable.Add(bar, beatC);
     }
 
-    public void AddBPM(int bar, float beat, float beatLength, float bpm)
+    public void AddBPM(int bar, double beat, double beatLength, double bpm)
     {
         Bpms.Add(new BPM(bar, bpm, beat, beatLength));
     }
 
-    public void AddStop(int bar, float beat, float beatLength, int idx)
+    public void AddStop(int bar, double beat, double beatLength, string key)
     {
-        Stops.Add(new Stop(bar, idx, beat, beatLength));
+        Stops.Add(new Stop(bar, key, beat, beatLength));
     }
 
-    public float GetPreviousBarBeatSum(int bar)
+    public double GetPreviousBarBeatSum(int bar)
     {
-        float sum = 0;
+		double sum = 0;
         for (int i = 0; i < bar; ++i)
         {
-            sum += 4.0f * BeatCTable[i];
+            sum += 4.0 * GetBeatC(i);
         }
         return sum;
     }
 
-    private float GetTiming(Note note)
+    private double GetTiming(Note note)
     {
         BPM prev = Bpms[Bpms.Count - 1];
-        float sum = 0;
+		double sum = 0;
         for (int i = Bpms.Count - 1; i >= 0; --i)
         {
-            float nextBeat = Bpms[i - 1].Beat;
+            double nextBeat = Bpms[i - 1].Beat;
 
             prev = Bpms[i - 1];
         }
         return sum;
     }
 
+	public double GetBeatC(int bar) => BeatCTable.ContainsKey(bar) ? BeatCTable[bar] : 1.0;
+
     public void CalCulateBeats()
     {
         Debug.Log("Calc");
 
-        for (int i = 0; i <= BarCount; ++i)
-            if (!BeatCTable.ContainsKey(i))
-                BeatCTable.Add(i, 1.0f);
-
         foreach (BPM b in Bpms)
         {
-            b.CalculateBeat(GetPreviousBarBeatSum(b.Bar), BeatCTable[b.Bar]);
+            b.CalculateBeat(GetPreviousBarBeatSum(b.Bar), GetBeatC(b.Bar));
         }
         Bpms.Sort();
         if (Bpms.Count == 0 || (Bpms.Count > 0 && Bpms[Bpms.Count - 1].Beat != 0))
@@ -191,58 +191,58 @@ public class BMSPattern {
         Bpms[Bpms.Count - 1].Timing = 0;
         for (int i = Bpms.Count - 2; i > -1; --i)
         {
-            Bpms[i].Timing += Bpms[i + 1].Timing + (Bpms[i].Beat - Bpms[i + 1].Beat) / (Bpms[i + 1].Bpm * 0.0166666666f);
+            Bpms[i].Timing = Bpms[i + 1].Timing + (Bpms[i].Beat - Bpms[i + 1].Beat) / (Bpms[i + 1].Bpm / 60);
         }
 
         foreach (Stop s in Stops)
         {
-            s.CalculateBeat(GetPreviousBarBeatSum(s.Bar), BeatCTable[s.Bar]);
+            s.CalculateBeat(GetPreviousBarBeatSum(s.Bar), GetBeatC(s.Bar));
             s.Timing = GetTimingInSecond(s);
         }
         Stops.Sort();
 
         foreach(BGAChange c in BGAChanges)
         {
-            c.CalculateBeat(GetPreviousBarBeatSum(c.Bar), BeatCTable[c.Bar]);
+            c.CalculateBeat(GetPreviousBarBeatSum(c.Bar), GetBeatC(c.Bar));
         }
         BGAChanges.Sort();
 
 
         foreach (Note n in BGSounds)
         {
-            n.CalculateBeat(GetPreviousBarBeatSum(n.Bar), BeatCTable[n.Bar]);
+            n.CalculateBeat(GetPreviousBarBeatSum(n.Bar), GetBeatC(n.Bar));
             n.Timing = GetTimingInSecond(n);
         }
         BGSounds.Sort();
 
         foreach (Line l in Lines)
         {
+			int idx = Stops.Count - 1;
             foreach (Note n in l.noteList)
             {
-                n.CalculateBeat(GetPreviousBarBeatSum(n.Bar), BeatCTable[n.Bar]);
-                n.Timing = GetTimingInSecond(n);
-                //n.Timing = GetTiming(n.Beat);
+                n.CalculateBeat(GetPreviousBarBeatSum(n.Bar), GetBeatC(n.Bar));
+				n.Timing = GetTimingInSecond(n);
             }
             l.noteList.Sort();
         }
     }
 
-    private float GetBPM(float beat)
+    private double GetBPM(double beat)
     {
         int i;
         for (i = Bpms.Count - 1; i > 0 && beat > Bpms[i - 1].Beat; --i) ;
         return Bpms[i].Bpm;
     }
 
-    private float GetTimingInSecond(BMSObject obj)
+    private double GetTimingInSecond(BMSObject obj)
     {
-        float timing = 0.0f;
+        double timing = 0;
         int i;
         for (i = Bpms.Count - 1; i > 0 && obj.Beat > Bpms[i - 1].Beat; --i)
         {
-            timing += (Bpms[i - 1].Beat - Bpms[i].Beat) / (Bpms[i].Bpm * 0.016666666f);
+            timing += (Bpms[i - 1].Beat - Bpms[i].Beat) / Bpms[i].Bpm * 60;
         }
-        timing += (obj.Beat - Bpms[i].Beat) / (Bpms[i].Bpm * 0.016666666f);
+        timing += (obj.Beat - Bpms[i].Beat) / Bpms[i].Bpm * 60;
         return timing;
     }
 }

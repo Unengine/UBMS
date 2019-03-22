@@ -15,6 +15,8 @@ public class BMSDrawer : MonoBehaviour {
     Sprite OddNote;
     [SerializeField]
     Sprite EvenNote;
+	[SerializeField]
+	Sprite LandMine;
     [SerializeField]
     Sprite LongOddNote;
     [SerializeField]
@@ -49,7 +51,9 @@ public class BMSDrawer : MonoBehaviour {
             {
                 Note n = pat.Lines[i].noteList[j];
                 GameObject note = Instantiate(notePrefab, noteParent) as GameObject;
-                note.transform.position = new Vector2(xPoses[i], n.Beat * BMSGameManager.speed);
+				if (n.Extra == -1) note.GetComponent<SpriteRenderer>().sprite = LandMine;
+
+                note.transform.position = new Vector2(xPoses[i], (float)(n.Beat * BMSGameManager.speed));
                 if (n.Extra == 1)
                 {
                     GameObject longNote = Instantiate(longNotePrefab, noteParent) as GameObject;
@@ -64,7 +68,7 @@ public class BMSDrawer : MonoBehaviour {
         for (int i = 0; i < pat.BeatCTable.Count; ++i)
         {
             GameObject inst = Instantiate(LinePrefab, noteParent) as GameObject;
-            inst.transform.position = new Vector2(0, pat.GetPreviousBarBeatSum(i) * BMSGameManager.speed);
+            inst.transform.position = new Vector2(0, (float)(pat.GetPreviousBarBeatSum(i) * BMSGameManager.speed));
         }
     }
 }
