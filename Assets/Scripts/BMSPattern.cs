@@ -245,4 +245,6 @@ public class BMSPattern {
         timing += (obj.Beat - Bpms[i].Beat) / Bpms[i].Bpm * 60;
         return timing;
     }
+
+	public BMSObject Peek(List<BMSObject> list) => list[list.Count - 1];
 }
