@@ -79,7 +79,7 @@ public class BMSGameManager : MonoBehaviour
 			if (pat.Lines[i].noteList.Count <= 0) continue;
 			Note n = pat.Lines[i].noteList[pat.Lines[i].noteList.Count - 1];
 			if (judge.Judge(n, currentTime) == JudgeType.IGNORE) continue;
-
+			
 			if (Input.GetKeyDown(Keys[i]) && pat.Lines[i].noteList[pat.Lines[i].noteList.Count - 1].Extra != 1)
 			{
 				HandleNote(pat.Lines[i], i);
@@ -88,7 +88,6 @@ public class BMSGameManager : MonoBehaviour
 			{
 				HandleNote(pat.Lines[i], i);
 			}
-
 		}
 	}
 
@@ -119,58 +118,89 @@ public class BMSGameManager : MonoBehaviour
 			stopTime = 0.0;
 		}
 
+
+
 		double avg = currentBPM * dt;
 
-		if (pat.Bpms.Count > 0)
+		BMSObject next = null;
+		BPM nextBPM = null;
+		bool flag = false;
+
+		if(pat.Bpms.Count > 0)
 		{
-			avg = 0.0;
-			BPM next = pat.Bpms[pat.Bpms.Count - 1];
-			double prevTime = currentTime;
-			while (pat.Bpms.Count > 0 && next.Timing <= currentTime + dt - stopTime)
+			next = nextBPM = pat.Bpms[pat.Bpms.Count - 1];
+			if(next.Timing < currentTime + dt)
 			{
-				if (pat.Stops.Count > 0)
-				{
-					Stop nextStop = pat.Stops[pat.Stops.Count - 1];
-					while (pat.Stops.Count > 0 && nextStop.Timing < next.Timing)
-					{
-						double duration = pat.StopDurations[nextStop.Key] / currentBPM * 240;
-						stopTime += duration;
-						pat.Stops.RemoveAt(pat.Stops.Count - 1);
-						if (pat.Stops.Count > 0)
-							nextStop = pat.Stops[pat.Stops.Count - 1];
-					}
-				}
-				double diff = next.Timing - prevTime;
-				avg += currentBPM * diff;
-				prevTime = next.Timing;
-				currentBPM = next.Bpm;
-				pat.Bpms.RemoveAt(pat.Bpms.Count - 1);
-				if (pat.Bpms.Count > 0) next = pat.Bpms[pat.Bpms.Count - 1];
+				flag = true;
+				avg = 0;
 			}
-			if (prevTime < currentTime + dt)
-			{
-				avg += currentBPM * (currentTime + dt - prevTime);
-			}
+		}
+		if(pat.Stops.Count > 0)
+		{
+			Stop stp = pat.Stops[pat.Stops.Count - 1];
+			if(next == null) next = stp;
+			else if(stp.Timing < next.Timing) next = stp;
 		}
 
-		if (pat.Stops.Count > 0)
-		{
-			Stop nextStop = pat.Stops[pat.Stops.Count - 1];
-			while (pat.Stops.Count > 0 && pat.Stops[pat.Stops.Count - 1].Timing < currentTime + dt)
+
+		double sub = 0;
+		double prevTime = currentTime;
+        while (next != null && next.Timing + stopTime <= currentTime + dt)
+        {
+			if(next is BPM)
 			{
-				double duration = pat.StopDurations[nextStop.Key] / currentBPM * 240;
+				double diff = nextBPM.Timing - prevTime;
+				avg += currentBPM * diff;
+				currentBPM = nextBPM.Bpm;
+				prevTime = nextBPM.Timing;
+                pat.Bpms.RemoveAt(pat.Bpms.Count - 1);
+			}
+			if(next is Stop)
+			{
+				double duration = pat.StopDurations[(next as Stop).Key] / currentBPM * 240;
 				stopTime += duration;
 				pat.Stops.RemoveAt(pat.Stops.Count - 1);
-				if (pat.Stops.Count > 0)
-					nextStop = pat.Stops[pat.Stops.Count - 1];
+
+				if(next.Timing + stopTime >= currentTime + dt)
+                {
+					double diff = currentTime + dt - next.Timing;
+                    sub += diff;
+                    stopTime -= diff;
+                    break;
+                }
+				else
+				{	
+					sub += stopTime;
+					stopTime = 0;
+				}
 			}
-		}
+
+			next = null;
+            if (pat.Bpms.Count > 0)
+            {
+                next = nextBPM = pat.Bpms[pat.Bpms.Count - 1];
+            }
+            if (pat.Stops.Count > 0)
+            {
+                Stop stp = pat.Stops[pat.Stops.Count - 1];
+                if (next == null) next = stp;
+                else if (stp.Timing < next.Timing) next = stp;
+            }
+        }
+
+		dt -= sub;
+		if(dt < 0) Debug.Log($"fuck, {dt}");
+        if (flag && prevTime <= currentTime + dt)
+        {
+            avg += currentBPM * (currentTime + dt - prevTime);
+        }
 
 		avg /= 60;
 		currentBeat += avg;
 		currentTime += dt;
 		scroll += avg * speed;
-		noteParent.transform.position = new Vector3(0.0f, (float)-scroll, 0.0f);    //손실을 적게 일어나게 하기 위해 누적된 double을 float로 변환.
+		noteParent.transform.position = new Vector3(0.0f, (float)-scroll, 0.0f);
+		//손실을 적게 일어나게 하기 위해 누적된 double을 float로 변환.
 	}
 
 	private void HandleNote(Line l, int idx, float volume = 1.0f)
