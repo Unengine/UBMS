@@ -79,7 +79,7 @@ public class BMSGameManager : MonoBehaviour
 			if (pat.Lines[i].noteList.Count > 0)
 			{
                 Note n = pat.Lines[i].noteList[pat.Lines[i].noteList.Count - 1];
-                if (judge.Judge(n, currentTime) != JudgeType.IGNORE)
+                if (judge.Judge(n, currentTime + stopTime) != JudgeType.IGNORE)
                 {
                     if (Input.GetKeyDown(Keys[i]) && n.Extra != 1)
                     {
@@ -109,6 +109,7 @@ public class BMSGameManager : MonoBehaviour
 		}
 
 		double dt = Time.fixedDeltaTime;
+		currentTime += Time.fixedDeltaTime;
 		PlayNotes();
 		if (stopTime > 0.0)
 		{
@@ -199,7 +200,7 @@ public class BMSGameManager : MonoBehaviour
 
 		avg /= 60;
 		currentBeat += avg;
-		currentTime += dt;
+		//currentTime += dt;
 		scroll += avg * speed;
 		noteParent.transform.position = new Vector3(0.0f, (float)-scroll, 0.0f);
 		//손실을 적게 일어나게 하기 위해 누적된 double을 float로 변환.
@@ -211,7 +212,7 @@ public class BMSGameManager : MonoBehaviour
 		int idx = list.Count - 1;
 
         Note n = list[idx];
-        if (n.Extra == -1 && judge.Judge(n, currentTime) == JudgeType.PGREAT)
+        if (n.Extra == -1 && judge.Judge(n, currentTime + stopTime) == JudgeType.PGREAT)
         {
             Debug.Log("bomb");
             comboText.text = "LANDMINE!";
@@ -230,7 +231,7 @@ public class BMSGameManager : MonoBehaviour
         l.noteList.RemoveAt(l.noteList.Count - 1);
 
 		sm.PlayKeySound(n.KeySound, volume);
-		JudgeType result = judge.Judge(n, currentTime);
+		JudgeType result = judge.Judge(n, currentTime + stopTime);
 		if (result > JudgeType.BAD)
 		{
 			comboText.text = result + " " + ++combo;

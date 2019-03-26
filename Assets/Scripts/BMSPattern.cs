@@ -226,6 +226,7 @@ public class BMSPattern {
         foreach (Line l in Lines)
         {
 			int idx = Stops.Count - 1;
+
             foreach (Note n in l.landMineList)
             {
                 n.CalculateBeat(GetPreviousBarBeatSum(n.Bar), GetBeatC(n.Bar));
@@ -239,13 +240,24 @@ public class BMSPattern {
             l.noteList.Sort();
             l.landMineList.Sort();
         }
+
+        foreach (Line l in Lines)
+        {
+            for (int i = l.noteList.Count - 1; i > -1; --i)
+            {
+                Note n = l.noteList[i];
+
+
+                Debug.Log($"{n.Timing} / BPM : {GetBPM(n.Beat)}");
+            }
+        }
     }
 
     private double GetBPM(double beat)
     {
-        int i;
-        for (i = Bpms.Count - 1; i > 0 && beat > Bpms[i - 1].Beat; --i) ;
-        return Bpms[i].Bpm;
+        int idx = Bpms.Count - 1;
+        while (idx > 0 && beat >= Bpms[--idx].Beat) ;
+        return Bpms[idx + 1].Bpm;
     }
 
     private double GetTimingInSecond(BMSObject obj)
