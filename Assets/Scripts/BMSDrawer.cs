@@ -51,7 +51,6 @@ public class BMSDrawer : MonoBehaviour {
             {
                 Note n = pat.Lines[i].noteList[j];
                 GameObject note = Instantiate(notePrefab, noteParent) as GameObject;
-				if (n.Extra == -1) note.GetComponent<SpriteRenderer>().sprite = LandMine;
 
                 note.transform.position = new Vector2(xPoses[i], (float)(n.Beat * BMSGameManager.speed));
                 if (n.Extra == 1)
@@ -61,7 +60,19 @@ public class BMSDrawer : MonoBehaviour {
                     longNote.transform.localScale = new Vector3(1.0f, (note.transform.position - prev).y * 2.666666f, 1.0f);
                 }
                 prev = note.transform.position;
-                n.model = note;
+                n.Model = note;
+            }
+        }
+
+        for (int i = 0; i < 9; ++i)
+        {
+            for (int j = pat.Lines[i].landMineList.Count - 1; j >= 0; --j)
+            {
+                Note n = pat.Lines[i].landMineList[j];
+                GameObject note = Instantiate(notePrefab, noteParent) as GameObject;
+                note.GetComponent<SpriteRenderer>().sprite = LandMine;
+                note.transform.position = new Vector2(xPoses[i], (float)(n.Beat * BMSGameManager.speed));
+                n.Model = note;
             }
         }
 

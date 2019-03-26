@@ -6,7 +6,7 @@ using UnityEngine.Video;
 public class BMSGameManager : MonoBehaviour
 {
 	public bool isAuto = false;
-	public static float speed = 8f;
+	public static float speed = 7f;
 
 	[SerializeField]
 	private UnityEngine.UI.Text comboText;
@@ -60,7 +60,7 @@ public class BMSGameManager : MonoBehaviour
 		pat.Bpms.RemoveAt(pat.Bpms.Count - 1);
 		comboAnim = comboText.GetComponent<Animator>();
 		judge = JudgeManager.instance;
-		//Application.targetFrameRate = 60;
+		Application.targetFrameRate = 120;
 
 		Video.Prepare();
 		yield return new WaitUntil(() => Video.isPrepared);
@@ -72,21 +72,24 @@ public class BMSGameManager : MonoBehaviour
 
 	private void Update()
 	{
-		if (isPaused) return;
+		if (isPaused || isAuto) return;
 
 		for (int i = 0; i < Keys.Length; ++i)
 		{
-			if (pat.Lines[i].noteList.Count <= 0) continue;
-			Note n = pat.Lines[i].noteList[pat.Lines[i].noteList.Count - 1];
-			if (judge.Judge(n, currentTime) == JudgeType.IGNORE) continue;
-			
-			if (Input.GetKeyDown(Keys[i]) && pat.Lines[i].noteList[pat.Lines[i].noteList.Count - 1].Extra != 1)
+			if (pat.Lines[i].noteList.Count > 0)
 			{
-				HandleNote(pat.Lines[i], i);
-			}
-			else if (Input.GetKeyUp(Keys[i]) && pat.Lines[i].noteList[pat.Lines[i].noteList.Count - 1].Extra == 1)
-			{
-				HandleNote(pat.Lines[i], i);
+                Note n = pat.Lines[i].noteList[pat.Lines[i].noteList.Count - 1];
+                if (judge.Judge(n, currentTime) != JudgeType.IGNORE)
+                {
+                    if (Input.GetKeyDown(Keys[i]) && n.Extra != 1)
+                    {
+                        HandleNote(pat.Lines[i], i);
+                    }
+                    else if (Input.GetKeyUp(Keys[i]) && n.Extra == 1)
+                    {
+                        HandleNote(pat.Lines[i], i);
+                    }
+                }
 			}
 		}
 	}
@@ -126,29 +129,32 @@ public class BMSGameManager : MonoBehaviour
 		BPM nextBPM = null;
 		bool flag = false;
 
+
+		if(pat.Stops.Count > 0)
+		{
+			next = pat.Stops[pat.Stops.Count - 1];
+		}
 		if(pat.Bpms.Count > 0)
 		{
-			next = nextBPM = pat.Bpms[pat.Bpms.Count - 1];
+			BPM bpm = pat.Bpms[pat.Bpms.Count - 1];
+			if(next == null) next = nextBPM = bpm;
+			else if(bpm.Beat <= next.Beat) next = nextBPM = bpm;
+
 			if(next.Timing < currentTime + dt)
 			{
 				flag = true;
 				avg = 0;
 			}
 		}
-		if(pat.Stops.Count > 0)
-		{
-			Stop stp = pat.Stops[pat.Stops.Count - 1];
-			if(next == null) next = stp;
-			else if(stp.Timing < next.Timing) next = stp;
-		}
 
 
 		double sub = 0;
 		double prevTime = currentTime;
-        while (next != null && next.Timing + stopTime <= currentTime + dt)
+        while (next != null && next.Timing + stopTime < currentTime + dt)
         {
 			if(next is BPM)
 			{
+				//Debug.Log($"change bpm to {nextBPM.Bpm} in {next.Bar}");
 				double diff = nextBPM.Timing - prevTime;
 				avg += currentBPM * diff;
 				currentBPM = nextBPM.Bpm;
@@ -157,34 +163,30 @@ public class BMSGameManager : MonoBehaviour
 			}
 			if(next is Stop)
 			{
+				//Debug.Log($"stop in {next.Bar}");
 				double duration = pat.StopDurations[(next as Stop).Key] / currentBPM * 240;
 				stopTime += duration;
 				pat.Stops.RemoveAt(pat.Stops.Count - 1);
-
 				if(next.Timing + stopTime >= currentTime + dt)
-                {
+				{
 					double diff = currentTime + dt - next.Timing;
-                    sub += diff;
-                    stopTime -= diff;
-                    break;
-                }
-				else
-				{	
-					sub += stopTime;
-					stopTime = 0;
+					sub += diff;
+					stopTime -= diff;
+					break;
 				}
 			}
 
 			next = null;
-            if (pat.Bpms.Count > 0)
-            {
-                next = nextBPM = pat.Bpms[pat.Bpms.Count - 1];
-            }
+
             if (pat.Stops.Count > 0)
             {
-                Stop stp = pat.Stops[pat.Stops.Count - 1];
-                if (next == null) next = stp;
-                else if (stp.Timing < next.Timing) next = stp;
+                next = pat.Stops[pat.Stops.Count - 1];
+            }
+            if (pat.Bpms.Count > 0)
+            {
+                BPM bpm = pat.Bpms[pat.Bpms.Count - 1];
+                if (next == null) next = nextBPM = bpm;
+                else if (bpm.Beat <= next.Beat) next = nextBPM = bpm;
             }
         }
 
@@ -203,17 +205,30 @@ public class BMSGameManager : MonoBehaviour
 		//손실을 적게 일어나게 하기 위해 누적된 double을 float로 변환.
 	}
 
+	private void Damage(Line l)
+	{
+		List<Note> list = l.landMineList;
+		int idx = list.Count - 1;
+
+        Note n = list[idx];
+        if (n.Extra == -1 && judge.Judge(n, currentTime) == JudgeType.PGREAT)
+        {
+            Debug.Log("bomb");
+            comboText.text = "LANDMINE!";
+            comboAnim.Rebind();
+            comboAnim.Play("ComboUp");
+            n.Extra = -2;
+        }
+		
+	}
+
 	private void HandleNote(Line l, int idx, float volume = 1.0f)
 	{
 		if (l.noteList.Count <= 0) return;
-		Note n = l.noteList[l.noteList.Count - 1];
-		n.model.SetActive(false);
-		l.noteList.RemoveAt(l.noteList.Count - 1);
-		if (n.Extra == -1)
-		{
-			//comboText.text = "LANDMINE!";
-			return;
-		}
+        Note n = l.noteList[l.noteList.Count - 1];
+        n.Model.SetActive(false);
+        l.noteList.RemoveAt(l.noteList.Count - 1);
+
 		sm.PlayKeySound(n.KeySound, volume);
 		JudgeType result = judge.Judge(n, currentTime);
 		if (result > JudgeType.BAD)
@@ -237,7 +252,8 @@ public class BMSGameManager : MonoBehaviour
 
 	private void PlayNotes()
 	{
-		while (pat.BGSounds.Count > 0 && pat.BGSounds[pat.BGSounds.Count - 1].Timing <= currentTime)
+
+        while (pat.BGSounds.Count > 0 && pat.BGSounds[pat.BGSounds.Count - 1].Timing <= currentTime)
 		{
 
 			int keySound = pat.BGSounds[pat.BGSounds.Count - 1].KeySound;
@@ -254,25 +270,44 @@ public class BMSGameManager : MonoBehaviour
 				{
 					HandleNote(l, i);
 				}
+				
+				while (l.landMineList.Count > 0 &&
+				judge.Judge(l.landMineList[l.landMineList.Count - 1], currentTime) == JudgeType.POOR)
+				{
+                    Note n = l.landMineList[l.landMineList.Count - 1];
+                    n.Model.SetActive(false);
+                    l.landMineList.RemoveAt(l.landMineList.Count - 1);
+				}
+			}
+		}
+		else
+		{
+			for (int i = 0; i < pat.Lines.Length; ++i)
+			{
+				Line l = pat.Lines[i];
+            	if (Input.GetKey(Keys[i]) && l.landMineList.Count > 0)
+                {
+                    Damage(l);
+                }
+				while (l.noteList.Count > 0 && judge.Judge(l.noteList[l.noteList.Count - 1], currentTime) == JudgeType.POOR)
+				{
+					HandleNote(l, i, 0.3f);
+				}
+				
+                while (l.landMineList.Count > 0 &&
+				judge.Judge(l.landMineList[l.landMineList.Count - 1], currentTime) == JudgeType.POOR)
+				{
+                    Note n = l.landMineList[l.landMineList.Count - 1];
+                    n.Model.SetActive(false);
+                    l.landMineList.RemoveAt(l.landMineList.Count - 1);
+				}
 			}
 		}
 
 		while (pat.Lines[5].noteList.Count > 0 && pat.Lines[5].noteList[pat.Lines[5].noteList.Count - 1].Timing <= currentTime)
 			HandleNote(pat.Lines[5], 5);
 
-		if (!isAuto)
-			for (int i = 0; i < pat.Lines.Length; ++i)
-			{
-				Line l = pat.Lines[i];
-				while (l.noteList.Count > 0 && judge.Judge(l.noteList[l.noteList.Count - 1], currentTime) == JudgeType.POOR)
-				{
-					combo = 0;
-					comboText.text = "POOR";
-					HandleNote(l, i, 0.3f);
-					//int keySound = l.noteQueue.Dequeue().KeySound;
-					//sm.PlayKeySound(keySound);
-				}
-			}
+
 	}
 
 	public void ToggleAuto()

@@ -16,9 +16,17 @@ public class BGAChange : BMSObject
 public class Line
 {
     public List<Note> noteList;
+    public List<Note> landMineList;
     public Line()
     {
-        noteList = new List<Note>();
+        noteList = new List<Note>()
+        {
+            Capacity = 225
+        };
+        landMineList = new List<Note>()
+        {
+            Capacity = 20
+        };
     }
 }
 
@@ -50,8 +58,8 @@ public abstract class BMSObject : IComparable<BMSObject>
 public class Note : BMSObject
 {
     public int KeySound { get; private set; }
-    public int Extra { get; private set; }
-    public GameObject model { get; set; }
+    public int Extra { get; set; }
+    public GameObject Model { get; set; }
 
     public Note(int bar, int keySound, double beat, double beatLength, int extra) : base(bar, beat, beatLength)
     {
@@ -128,7 +136,8 @@ public class BMSPattern {
 
     public void AddNote(int line, int bar, double beat, double beatLength, int keySound, int extra)
     {
-        Lines[line].noteList.Add(new Note(bar, keySound, beat, beatLength, extra));
+        if(extra == -1) Lines[line].landMineList.Add(new Note(bar, keySound, beat, beatLength, extra));
+        else Lines[line].noteList.Add(new Note(bar, keySound, beat, beatLength, extra));
     }
 
     public void AddBGSound(int bar, double beat, double beatLength, int keySound)
@@ -207,7 +216,6 @@ public class BMSPattern {
         }
         BGAChanges.Sort();
 
-
         foreach (Note n in BGSounds)
         {
             n.CalculateBeat(GetPreviousBarBeatSum(n.Bar), GetBeatC(n.Bar));
@@ -218,12 +226,18 @@ public class BMSPattern {
         foreach (Line l in Lines)
         {
 			int idx = Stops.Count - 1;
+            foreach (Note n in l.landMineList)
+            {
+                n.CalculateBeat(GetPreviousBarBeatSum(n.Bar), GetBeatC(n.Bar));
+				n.Timing = GetTimingInSecond(n);
+            }
             foreach (Note n in l.noteList)
             {
                 n.CalculateBeat(GetPreviousBarBeatSum(n.Bar), GetBeatC(n.Bar));
 				n.Timing = GetTimingInSecond(n);
             }
             l.noteList.Sort();
+            l.landMineList.Sort();
         }
     }
 
