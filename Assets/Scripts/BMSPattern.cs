@@ -42,7 +42,13 @@ public abstract class BMSObject : IComparable<BMSObject>
         Beat = (beat / beatLength) * 4.0;
     }
 
-    public void CalculateBeat(double prevBeats, double beatC)
+	public BMSObject(int bar, double beat)
+	{
+		Bar = bar;
+		Beat = beat;
+	}
+
+	public void CalculateBeat(double prevBeats, double beatC)
     {
         Beat = Beat * beatC + prevBeats;
     }
@@ -76,6 +82,11 @@ public class BPM : BMSObject
     {
         Bpm = bpm;
     }
+
+	public BPM(BPM bpm) : base(bpm.Bar, bpm.Beat)
+	{
+		Bpm = bpm.Bpm;
+	}
 }
 
 public class Stop : BMSObject
@@ -154,6 +165,11 @@ public class BMSPattern {
     {
         Bpms.Add(new BPM(bar, bpm, beat, beatLength));
     }
+
+	public void AddBPM(BPM bpm)
+	{
+		Bpms.Add(bpm);
+	}
 
     public void AddStop(int bar, double beat, double beatLength, string key)
     {
@@ -246,15 +262,35 @@ public class BMSPattern {
             for (int i = l.noteList.Count - 1; i > -1; --i)
             {
                 Note n = l.noteList[i];
-
-
-                Debug.Log($"{n.Timing} / BPM : {GetBPM(n.Beat)}");
+                int idx = Stops.Count;
+                double sum = 0;
+                while(idx > 0 && n.Beat > Stops[--idx].Beat) sum += StopDurations[Stops[idx].Key] / GetBPM(Stops[idx].Beat) * 240;
+                n.Timing += sum;
             }
+
+            for (int i = l.landMineList.Count - 1; i > -1; --i)
+            {
+                Note n = l.landMineList[i];
+                int idx = Stops.Count;
+                double sum = 0;
+                while(idx > 0 && n.Beat > Stops[--idx].Beat) sum += StopDurations[Stops[idx].Key] / GetBPM(Stops[idx].Beat) * 240;
+                n.Timing += sum;
+            }
+        }
+
+        for (int i = BGSounds.Count - 1; i > -1; --i)
+        {
+            Note n = BGSounds[i];
+            int idx = Stops.Count;
+            double sum = 0;
+            while (idx > 0 && n.Beat > Stops[--idx].Beat) sum += StopDurations[Stops[idx].Key] / GetBPM(Stops[idx].Beat) * 240;
+            n.Timing += sum;
         }
     }
 
     private double GetBPM(double beat)
     {
+        if (Bpms.Count == 1) return Bpms[0].Bpm;
         int idx = Bpms.Count - 1;
         while (idx > 0 && beat >= Bpms[--idx].Beat) ;
         return Bpms[idx + 1].Bpm;
