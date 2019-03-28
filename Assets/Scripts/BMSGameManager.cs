@@ -16,6 +16,7 @@ public class BMSGameManager : MonoBehaviour
 	private double currentBeat = 0;
 	[SerializeField]
 	private double currentTime = 0;
+	
 	[SerializeField]
 	private double scroll = 0;
 	[SerializeField]
@@ -108,6 +109,7 @@ public class BMSGameManager : MonoBehaviour
 			pat.BGAChanges.RemoveAt(pat.BGAChanges.Count - 1);
 		}
 
+		double prevStop = 0;
 		double dt = Time.fixedDeltaTime;
 		PlayNotes();
 		if (stopTime > 0.0)
@@ -118,10 +120,8 @@ public class BMSGameManager : MonoBehaviour
 				return;
 			}
 			dt -= stopTime;
-			stopTime = 0.0;
+			prevStop = stopTime;
 		}
-
-
 
 		double avg = currentBPM * dt;
 
@@ -129,75 +129,81 @@ public class BMSGameManager : MonoBehaviour
 		BPM nextBPM = null;
 		bool flag = false;
 
+		if (pat.Stops.Count > 0)
+		{
+			next = pat.Stops[pat.Stops.Count - 1];
+		}
 		if (pat.Bpms.Count > 0)
 		{
-			next = nextBPM = pat.Bpms[pat.Bpms.Count - 1];
+			BPM bpm = pat.Bpms[pat.Bpms.Count - 1];
+			if (next == null) next = nextBPM = bpm;
+			else if (bpm.Beat <= next.Beat) next = nextBPM = bpm;
+
 			if (next.Timing < currentTime + dt)
 			{
 				flag = true;
 				avg = 0;
 			}
 		}
-		if (pat.Stops.Count > 0)
-		{
-			Stop stp = pat.Stops[pat.Stops.Count - 1];
-			if (next == null) next = stp;
-			else if (stp.Timing < next.Timing) next = stp;
-		}
 
 
 		double sub = 0;
 		double prevTime = currentTime;
-		while (next != null && next.Timing + stopTime <= currentTime + dt)
+		while (next != null && next.Timing + stopTime < currentTime + Time.fixedDeltaTime)
 		{
 			if (next is BPM)
 			{
-				double diff = nextBPM.Timing - prevTime;
+				//Debug.Log($"change bpm to {nextBPM.Bpm} in {next.Bar}");
+				double diff = next.Timing - prevTime;
 				avg += currentBPM * diff;
 				currentBPM = nextBPM.Bpm;
-				prevTime = nextBPM.Timing;
+				prevTime = next.Timing;
 				pat.Bpms.RemoveAt(pat.Bpms.Count - 1);
 			}
 			if (next is Stop)
 			{
+				//Debug.Log($"stop in {next.Bar}");
+				double diff = next.Timing - prevTime;
+				avg += currentBPM * diff;
+				prevTime = next.Timing;
+
 				double duration = pat.StopDurations[(next as Stop).Key] / currentBPM * 240;
 				stopTime += duration;
 				pat.Stops.RemoveAt(pat.Stops.Count - 1);
 
-				if (next.Timing + stopTime >= currentTime + dt)
+				if(prevTime + stopTime >= currentTime + dt)
 				{
-					double diff = currentTime + dt - next.Timing;
-					sub += diff;
-					stopTime -= diff;
+					double sdiff = currentTime + dt - prevTime;
+					sub += sdiff;
+					stopTime -= sdiff;
 					break;
 				}
-				else
-				{
-					sub += stopTime;
-					stopTime = 0;
-				}
+
+				
 			}
 
 			next = null;
-			if (pat.Bpms.Count > 0)
-			{
-				next = nextBPM = pat.Bpms[pat.Bpms.Count - 1];
-			}
+
 			if (pat.Stops.Count > 0)
 			{
-				Stop stp = pat.Stops[pat.Stops.Count - 1];
-				if (next == null) next = stp;
-				else if (stp.Timing < next.Timing) next = stp;
+				next = pat.Stops[pat.Stops.Count - 1];
+			}
+			if (pat.Bpms.Count > 0)
+			{
+				BPM bpm = pat.Bpms[pat.Bpms.Count - 1];
+				if (next == null) next = nextBPM = bpm;
+				else if (bpm.Beat <= next.Beat) next = nextBPM = bpm;
 			}
 		}
 
 		dt -= sub;
-		if (dt < 0) Debug.Log($"dt is negative!, {dt}");
+		if (dt < 0) Debug.LogWarning($"dt is negative!, {dt}");
 		if (flag && prevTime <= currentTime + dt)
 		{
 			avg += currentBPM * (currentTime + dt - prevTime);
 		}
 
+		stopTime -= prevStop;
 		avg /= 60;
 		currentBeat += avg;
 		currentTime += dt;
@@ -205,6 +211,7 @@ public class BMSGameManager : MonoBehaviour
 		noteParent.transform.position = new Vector3(0.0f, (float)-scroll, 0.0f);
 		//손실을 적게 일어나게 하기 위해 누적된 double을 float로 변환.
 	}
+
 	private void Damage(Line l)
 	{
 		List<Note> list = l.landMineList;
