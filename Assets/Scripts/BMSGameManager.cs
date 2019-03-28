@@ -178,8 +178,6 @@ public class BMSGameManager : MonoBehaviour
 					stopTime -= sdiff;
 					break;
 				}
-
-				
 			}
 
 			next = null;
