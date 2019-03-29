@@ -10,6 +10,7 @@ public class BMSDrawer : MonoBehaviour {
     public GameObject longNotePrefab;
     public Transform noteParent;
     private float[] xPoses;
+	private int drawIdx = 0;
 
     [SerializeField]
     Sprite OddNote;
@@ -21,8 +22,15 @@ public class BMSDrawer : MonoBehaviour {
     Sprite LongOddNote;
     [SerializeField]
     Sprite LongEvenNote;
-    [SerializeField]
+	[SerializeField]
+	Sprite ScratchNote;
+	[SerializeField]
+	Sprite ScratchLongNote;
+	[SerializeField]
     GameObject LinePrefab;
+	[SerializeField]
+	Material mat;
+
 
     // Use this for initialization
     void Awake () {
@@ -43,26 +51,33 @@ public class BMSDrawer : MonoBehaviour {
 
     public void DrawNotes()
     {
-        Debug.Log("Draw");
-        for (int i = 0; i < 9; ++i)
-        {
-            Vector3 prev = Vector2.zero;
-            for (int j = pat.Lines[i].noteList.Count - 1; j >= 0; --j)
-            {
-                Note n = pat.Lines[i].noteList[j];
-                GameObject note = Instantiate(notePrefab, noteParent) as GameObject;
+		Debug.Log("Draw");
+		for (int i = 0; i < 9; ++i)
+		{
+			Vector3 prev = Vector2.zero;
+			for (int j = pat.Lines[i].noteList.Count - 1; j >= 0; --j)
+			{
+				Note n = pat.Lines[i].noteList[j];
+				GameObject note = Instantiate(notePrefab, noteParent) as GameObject;
+				if (i == 5) note.GetComponent<SpriteRenderer>().sprite = ScratchNote;
+				else if ((i & 1) == 0) note.GetComponent<SpriteRenderer>().sprite = OddNote;
+				else note.GetComponent<SpriteRenderer>().sprite = EvenNote;
 
-                note.transform.position = new Vector2(xPoses[i], (float)(n.Beat * BMSGameManager.speed));
-                if (n.Extra == 1)
-                {
-                    GameObject longNote = Instantiate(longNotePrefab, noteParent) as GameObject;
-                    longNote.transform.position = (note.transform.position + prev) * 0.5f + Vector3.up * 0.1875f;
-                    longNote.transform.localScale = new Vector3(1.0f, (note.transform.position - prev).y * 2.666666f, 1.0f);
-                }
-                prev = note.transform.position;
-                n.Model = note;
-            }
-        }
+
+				note.transform.position = new Vector2(xPoses[i], (float)(n.Beat * BMSGameManager.speed));
+				if (n.Extra == 1)
+				{
+					GameObject longNote = Instantiate(longNotePrefab, noteParent) as GameObject;
+					if (i == 5) longNote.GetComponent<SpriteRenderer>().sprite = ScratchLongNote;
+					else if ((i & 1) == 0) longNote.GetComponent<SpriteRenderer>().sprite = LongOddNote;
+					else longNote.GetComponent<SpriteRenderer>().sprite = LongEvenNote;
+					longNote.transform.position = (note.transform.position + prev) * 0.5f + Vector3.up * 0.1875f;
+					longNote.transform.localScale = new Vector3(1.0f, (note.transform.position - prev).y * 2.666666f, 1.0f);
+				}
+				prev = note.transform.position;
+				n.Model = note;
+			}
+		}
 
         for (int i = 0; i < 9; ++i)
         {
@@ -75,11 +90,38 @@ public class BMSDrawer : MonoBehaviour {
                 n.Model = note;
             }
         }
+	}
 
-        for (int i = 0; i < pat.BeatCTable.Count; ++i)
-        {
-            GameObject inst = Instantiate(LinePrefab, noteParent) as GameObject;
-            inst.transform.position = new Vector2(0, (float)(pat.GetPreviousBarBeatSum(i) * BMSGameManager.speed));
-        }
-    }
+	void OnRenderObject()
+	{
+		if (!mat)
+		{
+			Debug.LogError("BMSDrawer has no material!");
+			return;
+		}
+
+		GL.PushMatrix();
+		mat.SetPass(0);
+
+		for (int i = drawIdx; i < pat.BarCount; ++i)
+		{
+			float y = (float)(pat.GetPreviousBarBeatSum(i) * BMSGameManager.speed - BMSGameManager.scroll);
+			if (y < 0.25f)
+			{
+				drawIdx = i - 1;
+				continue;
+			}
+			if (y > 12.0f) break;
+
+			GL.Begin(GL.LINES);
+			GL.Color(Color.white);
+
+			GL.Vertex(new Vector3(-3.4375f, y, 0.0f));
+			GL.Vertex(new Vector3(3.5625f, y, 0.0f));
+
+			GL.End();
+		}
+
+		GL.PopMatrix();
+	}
 }

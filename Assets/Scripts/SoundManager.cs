@@ -31,7 +31,7 @@ public class SoundManager : MonoBehaviour {
     }
 
     int idx = 0;
-    public void PlayKeySound(int keySound, float volume)
+    public void PlayKeySound(int keySound, float volume = 1.0f)
     {
         if (keySound >= clips.Count + 1) return;
         mulChannel.PlayAtSequence(clips[keySound - 1], volume);

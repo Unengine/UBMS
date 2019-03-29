@@ -32,13 +32,13 @@ public class JudgeManager {
         double diff = DAbs(n.Timing - currentTime) * 1000;
         //Debug.Log($"note : {n.Timing}, currentTime : {currentTime}");
 
-        if (diff < 21.0)
+        if (diff <= 21.0)
             return JudgeType.PGREAT;
-        else if (diff < 60.0)
+        else if (diff <= 60.0)
             return JudgeType.GREAT;
-        else if (diff < 150.0)
+        else if (diff <= 150.0)
             return JudgeType.GOOD;
-        else if (diff < 220.0)
+        else if (diff <= 220.0)
             return JudgeType.BAD;
         else if (currentTime > n.Timing)
             return JudgeType.POOR;

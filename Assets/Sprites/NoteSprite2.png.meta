@@ -8,6 +8,7 @@ TextureImporter:
     21300006: NoteSprite2_3
     21300008: NoteSprite2_4
     21300010: NoteSprite2_5
+    21300012: NoteSprite2_6
   externalObjects: {}
   serializedVersion: 7
   mipmaps:
@@ -116,7 +117,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 1
-        y: 41
+        y: 42
         width: 14
         height: 6
       alignment: 7
@@ -136,7 +137,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 1
-        y: 34
+        y: 35
         width: 14
         height: 6
       alignment: 7
@@ -156,7 +157,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 1
-        y: 27
+        y: 28
         width: 14
         height: 6
       alignment: 7
@@ -176,7 +177,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 1
-        y: 20
+        y: 21
         width: 14
         height: 6
       alignment: 0
@@ -196,7 +197,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 1
-        y: 13
+        y: 14
         width: 14
         height: 6
       alignment: 0
@@ -216,7 +217,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 1
-        y: 6
+        y: 7
         width: 14
         height: 6
       alignment: 0
@@ -227,6 +228,26 @@ TextureImporter:
       tessellationDetail: 0
       bones: []
       spriteID: 36eb317e22d9daa49aa86282153232e6
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NoteSprite2_6
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 0
+        width: 14
+        height: 6
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9534b8a5a2a60244b9cdb9b390ce7ccf
       vertices: []
       indices: 
       edges: []

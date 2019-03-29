@@ -47,8 +47,9 @@ public class BMSParser : MonoBehaviour {
 		//"BMSFiles/Aleph0/"
 		//"BMSFiles/DeadSoul/"
 		//"BMSFiles/Lots of Spices/"
-		"BMSFiles/Engine/"
-        //"BMSFiles/3rd Avenue/"
+		//"BMSFiles/Engine/"
+		//"BMSFiles/3rd Avenue/"
+		"BMSFiles/AliceInMisanthrope/"
 		;
         Init();
         GetFile(Resources.Load<TextAsset>(path +
@@ -62,8 +63,9 @@ public class BMSParser : MonoBehaviour {
 			//"_7ANOTHER"
 			//"soundsouler_deadsoul_Revive"
 	        //"778_LOSmineds"
-			"engine_XYZ"
+			//"engine_XYZ"
             //"3AE7_XYZ"
+			"_7HYPER"
 			));
             
         ParseHeader();

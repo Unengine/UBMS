@@ -258,35 +258,35 @@ public class BMSPattern
 			l.landMineList.Sort();
 		}
 
-		//foreach (Line l in Lines)
-		//{
-		//	for (int i = l.noteList.Count - 1; i > -1; --i)
-		//	{
-		//		Note n = l.noteList[i];
-		//		int idx = Stops.Count;
-		//		double sum = 0;
-		//		while (idx > 0 && n.Beat > Stops[--idx].Beat) sum += StopDurations[Stops[idx].Key] / GetBPM(Stops[idx].Beat) * 240;
-		//		n.Timing += sum;
-		//	}
+		foreach (Line l in Lines)
+		{
+			for (int i = l.noteList.Count - 1; i > -1; --i)
+			{
+				Note n = l.noteList[i];
+				int idx = Stops.Count;
+				double sum = 0;
+				while (idx > 0 && n.Beat > Stops[--idx].Beat) sum += StopDurations[Stops[idx].Key] / GetBPM(Stops[idx].Beat) * 240;
+				n.Timing += sum;
+			}
 
-		//	for (int i = l.landMineList.Count - 1; i > -1; --i)
-		//	{
-		//		Note n = l.landMineList[i];
-		//		int idx = Stops.Count;
-		//		double sum = 0;
-		//		while (idx > 0 && n.Beat > Stops[--idx].Beat) sum += StopDurations[Stops[idx].Key] / GetBPM(Stops[idx].Beat) * 240;
-		//		n.Timing += sum;
-		//	}
-		//}
+			for (int i = l.landMineList.Count - 1; i > -1; --i)
+			{
+				Note n = l.landMineList[i];
+				int idx = Stops.Count;
+				double sum = 0;
+				while (idx > 0 && n.Beat > Stops[--idx].Beat) sum += StopDurations[Stops[idx].Key] / GetBPM(Stops[idx].Beat) * 240;
+				n.Timing += sum;
+			}
+		}
 
-		//for (int i = BGSounds.Count - 1; i > -1; --i)
-		//{
-		//	Note n = BGSounds[i];
-		//	int idx = Stops.Count;
-		//	double sum = 0;
-		//	while (idx > 0 && n.Beat > Stops[--idx].Beat) sum += StopDurations[Stops[idx].Key] / GetBPM(Stops[idx].Beat) * 240;
-		//	n.Timing += sum;
-		//}
+		for (int i = BGSounds.Count - 1; i > -1; --i)
+		{
+			Note n = BGSounds[i];
+			int idx = Stops.Count;
+			double sum = 0;
+			while (idx > 0 && n.Beat > Stops[--idx].Beat) sum += StopDurations[Stops[idx].Key] / GetBPM(Stops[idx].Beat) * 240;
+			n.Timing += sum;
+		}
 
 		//for (int i = Bpms.Count - 1; i > -1; --i)
 		//{

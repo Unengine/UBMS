@@ -5,20 +5,36 @@ using UnityEngine.Video;
 
 public class BMSGameManager : MonoBehaviour
 {
+	
 	public bool isAuto = false;
-	public static float speed = 6f;
+	public static double scroll = 0;
+	public static float speed = 7f;
+
 
 	[SerializeField]
+	private double AccuracySum = 0.0;
+	[SerializeField]
+	private int HitCount = 0;
+	[SerializeField]
+	private int score;
+	[SerializeField]
+	private UnityEngine.UI.Text FSText;
+	[SerializeField]
+	private UnityEngine.UI.Text BPMText;
+	[SerializeField]
+	private UnityEngine.UI.Text scoreText;
+	[SerializeField]
 	private UnityEngine.UI.Text comboText;
+	[SerializeField]
+	private Animator[] KeyPresses;
 	[SerializeField]
 	private Animator[] Explodes;
 	[SerializeField]
 	private double currentBeat = 0;
 	[SerializeField]
-	private double currentTime = 0;
-	
+	private double currentScrollTime = 0;
 	[SerializeField]
-	private double scroll = 0;
+	private double currentTime = 0;
 	[SerializeField]
 	private double stopTime = 0;
 	private KeyCode[] Keys;
@@ -59,9 +75,9 @@ public class BMSGameManager : MonoBehaviour
 		//StartCoroutine(MoveScroll());
 		currentBPM = pat.Bpms[pat.Bpms.Count - 1].Bpm;
 		pat.Bpms.RemoveAt(pat.Bpms.Count - 1);
+		UpdateBPMText(currentBPM);
 		comboAnim = comboText.GetComponent<Animator>();
 		judge = JudgeManager.instance;
-		Application.targetFrameRate = 120;
 
 		Video.Prepare();
 		yield return new WaitUntil(() => Video.isPrepared);
@@ -80,16 +96,19 @@ public class BMSGameManager : MonoBehaviour
 			if (pat.Lines[i].noteList.Count > 0)
 			{
 				Note n = pat.Lines[i].noteList[pat.Lines[i].noteList.Count - 1];
-				if (judge.Judge(n, currentTime) != JudgeType.IGNORE)
+				if (Input.GetKeyDown(Keys[i]) && n.Extra != 1)
 				{
-					if (Input.GetKeyDown(Keys[i]) && n.Extra != 1)
-					{
+					KeyPresses[i].Rebind();
+					KeyPresses[i].Play("Press");
+					if (judge.Judge(n, currentTime) != JudgeType.IGNORE)
 						HandleNote(pat.Lines[i], i);
-					}
-					else if (Input.GetKeyUp(Keys[i]) && n.Extra == 1)
-					{
+					sm.PlayKeySound(n.KeySound);
+				}
+				else if (Input.GetKeyUp(Keys[i]) && n.Extra == 1)
+				{
+					if (judge.Judge(n, currentTime) != JudgeType.IGNORE)
 						HandleNote(pat.Lines[i], i);
-					}
+					sm.PlayKeySound(n.KeySound);
 				}
 			}
 		}
@@ -112,6 +131,7 @@ public class BMSGameManager : MonoBehaviour
 		double prevStop = 0;
 		double dt = Time.fixedDeltaTime;
 		PlayNotes();
+		currentTime += Time.fixedDeltaTime;
 		if (stopTime > 0.0)
 		{
 			if (stopTime >= Time.fixedDeltaTime)
@@ -131,7 +151,7 @@ public class BMSGameManager : MonoBehaviour
 		if (pat.Stops.Count > 0)
 		{
 			next = pat.Stops[pat.Stops.Count - 1];
-			if (next.Timing < currentTime + dt)
+			if (next.Timing < currentScrollTime + dt)
 			{
 				flag = true;
 				avg = 0;
@@ -143,7 +163,7 @@ public class BMSGameManager : MonoBehaviour
 			if (next == null) next = bpm;
 			else if (bpm.Beat <= next.Beat) next = bpm;
 
-			if (next.Timing < currentTime + dt)
+			if (next.Timing < currentScrollTime + dt)
 			{
 				flag = true;
 				avg = 0;
@@ -152,14 +172,15 @@ public class BMSGameManager : MonoBehaviour
 
 
 		double sub = 0;
-		double prevTime = currentTime;
-		while (next != null && next.Timing + stopTime < currentTime + Time.fixedDeltaTime)
+		double prevTime = currentScrollTime;
+		while (next != null && next.Timing + stopTime < currentScrollTime + Time.fixedDeltaTime)
 		{
 			if (next is BPM)
 			{
 				double diff = next.Timing - prevTime;
 				avg += currentBPM * diff;
 				currentBPM = (next as BPM).Bpm;
+				UpdateBPMText(currentBPM);
 				prevTime = next.Timing;
 				pat.Bpms.RemoveAt(pat.Bpms.Count - 1);
 			}
@@ -173,9 +194,9 @@ public class BMSGameManager : MonoBehaviour
 				stopTime += duration;
 				pat.Stops.RemoveAt(pat.Stops.Count - 1);
 
-				if(prevTime + stopTime >= currentTime + dt)
+				if(prevTime + stopTime >= currentScrollTime + dt)
 				{
-					double sdiff = currentTime + dt - prevTime;
+					double sdiff = currentScrollTime + dt - prevTime;
 					sub += sdiff;
 					stopTime -= sdiff;
 					break;
@@ -198,16 +219,16 @@ public class BMSGameManager : MonoBehaviour
 
 		dt -= sub;
 		if (dt < 0) Debug.LogWarning($"dt is negative! may be dangerous., {dt}");
-		if (flag && prevTime <= currentTime + dt)
+		if (flag && prevTime <= currentScrollTime + dt)
 		{
-			avg += currentBPM * (currentTime + dt - prevTime);
+			avg += currentBPM * (currentScrollTime + dt - prevTime);
 		}
 
 
 		stopTime -= prevStop;
 		avg /= 60;
 		currentBeat += avg;
-		currentTime += dt;
+		currentScrollTime += dt;
 		scroll += avg * speed;
 		noteParent.transform.position = new Vector3(0.0f, (float)-scroll, 0.0f);
 		//손실을 적게 일어나게 하기 위해 누적된 double을 float로 변환.
@@ -233,11 +254,11 @@ public class BMSGameManager : MonoBehaviour
 	private void HandleNote(Line l, int idx, float volume = 1.0f)
 	{
 		if (l.noteList.Count <= 0) return;
+		++HitCount;
 		Note n = l.noteList[l.noteList.Count - 1];
 		n.Model.SetActive(false);
 		l.noteList.RemoveAt(l.noteList.Count - 1);
 
-		sm.PlayKeySound(n.KeySound, volume);
 		JudgeType result = judge.Judge(n, currentTime);
 		if (result > JudgeType.BAD)
 		{
@@ -256,6 +277,10 @@ public class BMSGameManager : MonoBehaviour
 			Explodes[idx].Rebind();
 			Explodes[idx].Play("KeyExplode");
 		}
+
+		UpdateScore(result);
+		if (result != JudgeType.POOR)
+			UpdateFSText((float)(n.Timing - currentTime) * 1000);
 	}
 
 	private void PlayNotes()
@@ -276,6 +301,7 @@ public class BMSGameManager : MonoBehaviour
 				Line l = pat.Lines[i];
 				while (l.noteList.Count > 0 && l.noteList[l.noteList.Count - 1].Timing <= currentTime)
 				{
+					sm.PlayKeySound(l.noteList[l.noteList.Count - 1].KeySound);
 					HandleNote(l, i);
 				}
 
@@ -299,6 +325,8 @@ public class BMSGameManager : MonoBehaviour
 				}
 				while (l.noteList.Count > 0 && judge.Judge(l.noteList[l.noteList.Count - 1], currentTime) == JudgeType.POOR)
 				{
+					Note n = l.noteList[l.noteList.Count - 1];
+					sm.PlayKeySound(n.KeySound, 0.3f);
 					HandleNote(l, i, 0.3f);
 				}
 
@@ -313,9 +341,49 @@ public class BMSGameManager : MonoBehaviour
 		}
 
 		while (pat.Lines[5].noteList.Count > 0 && pat.Lines[5].noteList[pat.Lines[5].noteList.Count - 1].Timing <= currentTime)
+		{
+			sm.PlayKeySound(pat.Lines[5].noteList[pat.Lines[5].noteList.Count - 1].KeySound);
 			HandleNote(pat.Lines[5], 5);
+		}
 
 
+	}
+
+	public void UpdateBPMText(double bpm)
+	{
+		if (bpm >= 1000 || bpm < 0) bpm = 0;
+		BPMText.text = "BPM\n" + ((int)bpm).ToString("D3");
+	}
+
+	public void UpdateFSText(float diff)
+	{
+		if (Mathf.Abs(diff) <= 21.0)
+		{
+			FSText.text = string.Empty;
+			return;
+		}
+
+		FSText.text = ((diff > 0) ? "FAST +" : "SLOW -") + Mathf.CeilToInt(Mathf.Abs(diff)) + "ms";
+	}
+
+	public void UpdateScore(JudgeType judge)
+	{
+		if (judge == JudgeType.PGREAT)
+		{
+			AccuracySum += 1;
+			score += 2;
+		}
+		else if (judge == JudgeType.GREAT)
+		{
+			AccuracySum += 0.8;
+			score += 1;
+		}
+		else if (judge == JudgeType.GOOD)
+		{
+			AccuracySum += 0.5;
+		}
+
+		scoreText.text = "SCORE : " + score.ToString("D4") + "\nACCURACY : " + (AccuracySum / HitCount).ToString("P");
 	}
 
 	public void ToggleAuto()
