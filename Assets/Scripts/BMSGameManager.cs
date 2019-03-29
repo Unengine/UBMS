@@ -6,7 +6,7 @@ using UnityEngine.Video;
 public class BMSGameManager : MonoBehaviour
 {
 	public bool isAuto = false;
-	public static float speed = 3.5f;
+	public static float speed = 6f;
 
 	[SerializeField]
 	private UnityEngine.UI.Text comboText;
@@ -126,18 +126,22 @@ public class BMSGameManager : MonoBehaviour
 		double avg = currentBPM * dt;
 
 		BMSObject next = null;
-		BPM nextBPM = null;
 		bool flag = false;
 
 		if (pat.Stops.Count > 0)
 		{
 			next = pat.Stops[pat.Stops.Count - 1];
+			if (next.Timing < currentTime + dt)
+			{
+				flag = true;
+				avg = 0;
+			}
 		}
 		if (pat.Bpms.Count > 0)
 		{
 			BPM bpm = pat.Bpms[pat.Bpms.Count - 1];
-			if (next == null) next = nextBPM = bpm;
-			else if (bpm.Beat <= next.Beat) next = nextBPM = bpm;
+			if (next == null) next = bpm;
+			else if (bpm.Beat <= next.Beat) next = bpm;
 
 			if (next.Timing < currentTime + dt)
 			{
@@ -153,16 +157,14 @@ public class BMSGameManager : MonoBehaviour
 		{
 			if (next is BPM)
 			{
-				//Debug.Log($"change bpm to {nextBPM.Bpm} in {next.Bar}");
 				double diff = next.Timing - prevTime;
 				avg += currentBPM * diff;
-				currentBPM = nextBPM.Bpm;
+				currentBPM = (next as BPM).Bpm;
 				prevTime = next.Timing;
 				pat.Bpms.RemoveAt(pat.Bpms.Count - 1);
 			}
 			if (next is Stop)
 			{
-				//Debug.Log($"stop in {next.Bar}");
 				double diff = next.Timing - prevTime;
 				avg += currentBPM * diff;
 				prevTime = next.Timing;
@@ -189,17 +191,18 @@ public class BMSGameManager : MonoBehaviour
 			if (pat.Bpms.Count > 0)
 			{
 				BPM bpm = pat.Bpms[pat.Bpms.Count - 1];
-				if (next == null) next = nextBPM = bpm;
-				else if (bpm.Beat <= next.Beat) next = nextBPM = bpm;
+				if (next == null) next = bpm;
+				else if (bpm.Beat <= next.Beat) next = bpm;
 			}
 		}
 
 		dt -= sub;
-		if (dt < 0) Debug.LogWarning($"dt is negative!, {dt}");
+		if (dt < 0) Debug.LogWarning($"dt is negative! may be dangerous., {dt}");
 		if (flag && prevTime <= currentTime + dt)
 		{
 			avg += currentBPM * (currentTime + dt - prevTime);
 		}
+
 
 		stopTime -= prevStop;
 		avg /= 60;

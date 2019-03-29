@@ -44,10 +44,10 @@ public class BMSParser : MonoBehaviour {
 		//"BMSFiles/YumeLyrith/"
 		//"BMSFiles/EOS_master0906/"
 		//"BMSFiles/Doppelganger_LeaF/"
-		"BMSFiles/Aleph0/"
+		//"BMSFiles/Aleph0/"
 		//"BMSFiles/DeadSoul/"
 		//"BMSFiles/Lots of Spices/"
-		//"BMSFiles/Engine/"
+		"BMSFiles/Engine/"
         //"BMSFiles/3rd Avenue/"
 		;
         Init();
@@ -59,10 +59,10 @@ public class BMSParser : MonoBehaviour {
 			//"_7ANOTHER"
 			//"eos_m"
 			//"_A7"
-			"_7ANOTHER"
+			//"_7ANOTHER"
 			//"soundsouler_deadsoul_Revive"
 	        //"778_LOSmineds"
-			//"engine_XYZ"
+			"engine_XYZ"
             //"3AE7_XYZ"
 			));
             
