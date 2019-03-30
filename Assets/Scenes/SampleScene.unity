@@ -834,8 +834,8 @@ RectTransform:
   - {fileID: 696854455}
   - {fileID: 1771071891}
   - {fileID: 1479540049}
-  - {fileID: 560435474}
   - {fileID: 789445261}
+  - {fileID: 560435474}
   - {fileID: 880845271}
   - {fileID: 1056504117}
   m_Father: {fileID: 519420032}
@@ -943,8 +943,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c7b8bfdb97416b46aa3193babfe790a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  drawer: {fileID: 0}
-  sm: {fileID: 0}
+  Drawer: {fileID: 519420036}
+  Sm: {fileID: 0}
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
@@ -1024,8 +1024,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   KeySoundObject: {fileID: 86760152}
-  audioSource: {fileID: 519420034}
-  bgSound: {fileID: 0}
   mulChannel: {fileID: 1191581263}
 --- !u!82 &519420034
 AudioSource:
@@ -1133,20 +1131,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c20859d63e88b024f9909a8ca50681c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isAuto: 1
-  AccuracySum: 0
-  HitCount: 0
-  score: 0
+  IsAuto: 0
+  NoteParent: {fileID: 0}
+  Video: {fileID: 2114437048}
   FSText: {fileID: 51085587}
   BPMText: {fileID: 121622945}
-  scoreText: {fileID: 996114839}
-  comboText: {fileID: 1234902351}
+  ScoreText: {fileID: 996114839}
+  ComboText: {fileID: 1234902351}
   KeyPresses:
   - {fileID: 696854458}
   - {fileID: 1771071894}
   - {fileID: 1479540052}
-  - {fileID: 560435477}
   - {fileID: 789445264}
+  - {fileID: 560435477}
   - {fileID: 880526483}
   - {fileID: 880845274}
   - {fileID: 880845274}
@@ -1161,13 +1158,14 @@ MonoBehaviour:
   - {fileID: 486848951}
   - {fileID: 486848951}
   - {fileID: 333198230}
-  currentBeat: 0
-  currentScrollTime: 0
-  currentTime: 0
-  stopTime: 0
-  noteParent: {fileID: 86760153}
-  Video: {fileID: 2114437048}
-  isPaused: 1
+  AccuracySum: 0
+  CurrentBeat: 0
+  CurrentScrollTime: 0
+  CurrentTime: 0
+  StopTime: 0
+  IsPaused: 1
+  HitCount: 0
+  Score: 0
 --- !u!114 &519420036
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1179,10 +1177,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc9b1bc31507cbe4589d5828cf3c5b4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  notePrefab: {fileID: 1388701407303046, guid: 0a0786f24b2ad254bbf736c3ce965cf9, type: 2}
-  longNotePrefab: {fileID: 1388701407303046, guid: 7034cac59518a8b4fb314a4cfd9abc9a,
+  NotePrefab: {fileID: 1388701407303046, guid: 0a0786f24b2ad254bbf736c3ce965cf9, type: 2}
+  LongNotePrefab: {fileID: 1388701407303046, guid: 7034cac59518a8b4fb314a4cfd9abc9a,
     type: 2}
-  noteParent: {fileID: 86760153}
+  NoteParent: {fileID: 86760153}
   OddNote: {fileID: 21300000, guid: 4f49f7f38cf6cf548a82f5ff98f52e45, type: 3}
   EvenNote: {fileID: 21300002, guid: 4f49f7f38cf6cf548a82f5ff98f52e45, type: 3}
   LandMine: {fileID: 21300004, guid: 4f49f7f38cf6cf548a82f5ff98f52e45, type: 3}
@@ -1191,7 +1189,7 @@ MonoBehaviour:
   ScratchNote: {fileID: 21300012, guid: 4f49f7f38cf6cf548a82f5ff98f52e45, type: 3}
   ScratchLongNote: {fileID: 21300008, guid: 4f49f7f38cf6cf548a82f5ff98f52e45, type: 3}
   LinePrefab: {fileID: 1777984620870182, guid: 04ce389efc51c3041b5baa5c8924b66c, type: 2}
-  mat: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
+  Mat: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
 --- !u!1 &560435473
 GameObject:
   m_ObjectHideFlags: 0
@@ -1204,7 +1202,7 @@ GameObject:
   - component: {fileID: 560435475}
   - component: {fileID: 560435477}
   m_Layer: 0
-  m_Name: KeyPress4
+  m_Name: KeyPress5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1221,11 +1219,11 @@ RectTransform:
   m_LocalScale: {x: 0, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 490031818}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -20, y: 0}
+  m_AnchoredPosition: {x: 70, y: 0}
   m_SizeDelta: {x: 48, y: 720}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &560435475
@@ -1240,7 +1238,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.62352943}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.50980395}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1578,7 +1576,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.62352943}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.50980395}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1630,7 +1628,7 @@ GameObject:
   - component: {fileID: 789445262}
   - component: {fileID: 789445264}
   m_Layer: 0
-  m_Name: KeyPress5
+  m_Name: KeyPress4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1647,11 +1645,11 @@ RectTransform:
   m_LocalScale: {x: 0, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 490031818}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 70, y: 0}
+  m_AnchoredPosition: {x: 25, y: 0}
   m_SizeDelta: {x: 48, y: 720}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &789445262
@@ -1666,7 +1664,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.62352943}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.50980395}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1829,7 +1827,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.62352943}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.50980395}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1917,7 +1915,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.62352943}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.50980395}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2449,7 +2447,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.62352943}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.50980395}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -2997,7 +2995,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 25, y: 0}
+  m_AnchoredPosition: {x: -20, y: 0}
   m_SizeDelta: {x: 48, y: 720}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1479540050
@@ -3012,7 +3010,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.62352943}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.50980395}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -3422,7 +3420,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.62352943}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.78431374}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -3492,7 +3490,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.62352943}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.50980395}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -3725,7 +3723,7 @@ VideoPlayer:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2114437046}
   m_Enabled: 1
-  m_VideoClip: {fileID: 32900000, guid: 3ae0851e4cc47a548b22183b2ef2bd93, type: 3}
+  m_VideoClip: {fileID: 32900000, guid: 16cc0e1abec5d514d8435eeae82dc9d0, type: 3}
   m_TargetCameraAlpha: 1
   m_TargetCamera3DLayout: 0
   m_TargetCamera: {fileID: 0}
@@ -3768,7 +3766,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Texture: {fileID: 0}
+  m_Texture: {fileID: 2800000, guid: c8d4c95841595244aabda94f8adc43cc, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0

@@ -5,12 +5,8 @@ using UnityEngine;
 public class SoundManager : MonoBehaviour {
 
     public GameObject KeySoundObject;
-    public AudioSource audioSource;
-    public AudioClip bgSound;
     public MultiChannelAudioSource mulChannel;
     private List<AudioClip> clips;
-    //private List<AudioSource> audioSources;
-    [SerializeField]
 
     public void Awake()
     {
@@ -24,13 +20,16 @@ public class SoundManager : MonoBehaviour {
     // Use this for initialization
     public void AddAudioClips(string path, List<string> soundPathes)
     {
-        if (!KeySoundObject) return;
+		if (!KeySoundObject)
+		{
+			Debug.LogError("No KeySoundObject!");
+			return;
+		}
         foreach(string s in soundPathes)
             clips.Add(Resources.Load<AudioClip>(path + s));
 
     }
 
-    int idx = 0;
     public void PlayKeySound(int keySound, float volume = 1.0f)
     {
         if (keySound >= clips.Count + 1) return;
@@ -41,10 +40,5 @@ public class SoundManager : MonoBehaviour {
         for (int i = 0; i < mulChannel.ChannelLength; ++i)
             if (mulChannel.GetChannel(i).isPlaying)
                 ++cnt;
-    }
-
-    public void PlayBG()
-    {
-        audioSource.PlayOneShot(bgSound);
     }
 }

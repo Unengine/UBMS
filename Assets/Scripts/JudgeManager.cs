@@ -1,18 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public enum JudgeType
-{
-    IGNORE,
-    POOR,
-    BAD,
-    GOOD,
-    GREAT,
-    PGREAT
-}
-
-public class JudgeManager {
+﻿public class JudgeManager {
 
     private static JudgeManager inst = null;
     public static JudgeManager instance
@@ -25,11 +11,9 @@ public class JudgeManager {
         private set { inst = value; }
     }
 
-	public double DAbs(double d) => (d >= 0) ? d : -d;
-
     public JudgeType Judge(Note n, double currentTime)
     {
-        double diff = DAbs(n.Timing - currentTime) * 1000;
+        double diff = Utility.DAbs(n.Timing - currentTime) * 1000;
         //Debug.Log($"note : {n.Timing}, currentTime : {currentTime}");
 
         if (diff <= 21.0)
@@ -45,4 +29,14 @@ public class JudgeManager {
         else
             return JudgeType.IGNORE;
     }
+}
+
+public enum JudgeType
+{
+	IGNORE,
+	POOR,
+	BAD,
+	GOOD,
+	GREAT,
+	PGREAT
 }
