@@ -12,6 +12,8 @@ public class BMSGameManager : MonoBehaviour
 	[SerializeField]
 	private Transform NoteParent;
 	[SerializeField]
+	private VideoClip Clip;
+	[SerializeField]
 	private VideoPlayer Video;
 	[SerializeField]
 	private UnityEngine.UI.Text FSText;
@@ -21,7 +23,7 @@ public class BMSGameManager : MonoBehaviour
 	private UnityEngine.UI.Text ScoreText;
 	[SerializeField]
 	private UnityEngine.UI.Text ComboText;
-	[SerializeField]
+	[SerializeField]	
 	private Animator[] KeyPresses;
 	[SerializeField]
 	private Animator[] Explodes;
@@ -71,6 +73,16 @@ public class BMSGameManager : MonoBehaviour
 
 		if (Video.isActiveAndEnabled)
 		{
+			for(int i = Pat.BGAChanges.Count - 1; i > -1; --i)
+			{
+				if(!Pat.BGAChanges[i].IsPic)
+				{
+					Clip = Pat.BGVideoTable[Pat.BGAChanges[i].Key];
+					break;
+				}
+			}
+
+			Video.clip = Clip;
 			Video.Prepare();
 			yield return new WaitUntil(() => Video.isPrepared);
 			Debug.Log("video prepare done");
@@ -110,20 +122,27 @@ public class BMSGameManager : MonoBehaviour
 					HandleNote(Pat.Lines[i], i);
 				}
 			}
+
+			if (Input.GetKey(Keys[i]))
+			{
+				KeyPresses[i].speed = 0;
+			}
+			else KeyPresses[i].speed = 1;
 		}
 	}
 
 	private void FixedUpdate()
 	{
 		if (IsPaused) return;
-		while (Pat.BGAChanges.Count > 0 && Pat.BGAChanges.Peek.Beat - 0.7f * CurrentBPM / 177 <= CurrentBeat)
+		while (Pat.BGAChanges.Count > 0 && Pat.BGAChanges.Peek.Timing + 0.5 <= CurrentTime)
 		{
-			//if (!pat.BGAChanges[pat.BGAChanges.Count - 1].isPic)
-			//{
-			//	Debug.Log("play");
-			//	Video.Play();
-			//}
-
+			Debug.Log("check");
+			if (!Pat.BGAChanges.Peek.IsPic)
+			{
+				Debug.Log("play");
+				Video.Play();
+			}
+			Debug.Log("BG Changed at " + CurrentTime);
 			Pat.BGAChanges.RemoveLast();
 		}
 

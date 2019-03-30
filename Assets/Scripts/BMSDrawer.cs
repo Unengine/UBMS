@@ -38,15 +38,18 @@ public class BMSDrawer : MonoBehaviour {
 		Header = BMSParser.Instance.Header;
 		Pat = BMSParser.Instance.Pat;
 		xPoses = new float[9];
-        xPoses[0] = -2.125f;
-        xPoses[1] = -1.25f;
-        xPoses[2] = -0.375f;
-        xPoses[3] = 0.5f;
-        xPoses[4] = 1.375f;
-        xPoses[5] = -3f;
-        xPoses[6] = -10; //페달, 지원 안함
-        xPoses[7] = 2.25f;
-        xPoses[8] = 3.125f;
+		//xPoses[0] = -2.125f; 0.875
+		xPoses[0] = -10.81667f;
+		xPoses[1] = -9.94167f;
+		xPoses[2] = -9.06667f;
+		xPoses[3] = -8.19167f;
+		xPoses[4] = -7.31667f;
+		xPoses[5] = -11.69167f;
+		xPoses[6] = -10; //페달, 지원 안함
+        xPoses[7] = -6.44167f;
+		xPoses[8] = -5.56667f;
+
+		//6.44167 -12.56667f;
         
     }
 
@@ -66,7 +69,6 @@ public class BMSDrawer : MonoBehaviour {
 				else if ((i & 1) == 0) note.GetComponent<SpriteRenderer>().sprite = OddNote;
 				else note.GetComponent<SpriteRenderer>().sprite = EvenNote;
 
-				Debug.Log(BMSGameManager.Speed);
 				note.transform.position = new Vector2(xPoses[i], (float)(n.Beat * BMSGameManager.Speed));
 				if (n.Extra == 1)
 				{
@@ -119,8 +121,8 @@ public class BMSDrawer : MonoBehaviour {
 			GL.Begin(GL.LINES);
 			GL.Color(Color.white);
 
-			GL.Vertex(new Vector3(-3.4375f, y, 0.0f));
-			GL.Vertex(new Vector3(3.5625f, y, 0.0f));
+			GL.Vertex(new Vector3(-12.12917f, y, 0.0f));
+			GL.Vertex(new Vector3(-5.129167f, y, 0.0f));
 
 			GL.End();
 		}

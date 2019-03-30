@@ -10,7 +10,7 @@ AudioManager:
   m_SampleRate: 0
   m_DSPBufferSize: 1024
   m_VirtualVoiceCount: 600
-  m_RealVoiceCount: 200
+  m_RealVoiceCount: 255
   m_SpatializerPlugin: 
   m_AmbisonicDecoderPlugin: 
   m_DisableAudio: 0

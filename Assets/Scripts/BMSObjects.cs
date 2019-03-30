@@ -48,6 +48,18 @@ public abstract class BMSObject : System.IComparable<BMSObject>
 	}
 }
 
+public class BGChange : BMSObject
+{
+	public string Key { get; private set; }
+	public bool IsPic { get; set; }
+
+	public BGChange(int bar, string key, double beat, double beatLength, bool isPic) : base(bar, beat, beatLength)
+	{
+		Key = key;
+		IsPic = isPic;
+	}
+}
+
 public class Note : BMSObject
 {
 	public int KeySound { get; private set; }

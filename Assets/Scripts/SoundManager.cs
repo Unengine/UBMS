@@ -32,13 +32,16 @@ public class SoundManager : MonoBehaviour {
 
     public void PlayKeySound(int keySound, float volume = 1.0f)
     {
-        if (keySound >= clips.Count + 1) return;
-        mulChannel.PlayAtSequence(clips[keySound - 1], volume);
-        //audioSource.PlayOneShot(clips[keySound - 1]);
+		if (keySound == -1 || keySound >= clips.Count + 1) Debug.Log("error");
+
+        if (keySound >= clips.Count + 1 || keySound < 0) return;
+        //mulChannel.PlayAtSequence(clips[keySound - 1], volume);
+        mulChannel.PlayOneShotAtSequence(clips[keySound - 1]);
 
         int cnt = 0;
         for (int i = 0; i < mulChannel.ChannelLength; ++i)
             if (mulChannel.GetChannel(i).isPlaying)
                 ++cnt;
+
     }
 }
