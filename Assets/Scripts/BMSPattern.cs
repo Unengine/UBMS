@@ -4,22 +4,22 @@ using UnityEngine.Video;
 
 public class BMSPattern
 {
+	public int NoteCount { get; set; } = 0;
 	public int BarCount { get; set; } = 0;
 	public ListExtension<BGChange> BGAChanges { get; set; }
 	public ListExtension<Note> BGSounds { get; set; }
-	public ListExtension<string> KeySounds { get; set; }
 	public ListExtension<BPM> Bpms { get; set; }
 	public ListExtension<Stop> Stops { set; get; }
 	public Dictionary<string, double> StopDurations { get; set; }
 	public Dictionary<int, double> BeatCTable { get; set; }
-	public Dictionary<string, VideoClip> BGVideoTable { get; set; }
+	public Dictionary<string, string> BGVideoTable { get; set; }
 	public Line[] Lines { get; set; }
 
 	public BMSPattern()
 	{
 		BeatCTable = new Dictionary<int, double>();
 		StopDurations = new Dictionary<string, double>();
-		BGVideoTable = new Dictionary<string, VideoClip>();
+		BGVideoTable = new Dictionary<string, string>();
 		Stops = new ListExtension<Stop>()
 		{
 			Capacity = 5
@@ -27,10 +27,6 @@ public class BMSPattern
 		Bpms = new ListExtension<BPM>()
 		{
 			Capacity = 5
-		};
-		KeySounds = new ListExtension<string>()
-		{
-			Capacity = 300
 		};
 		BGAChanges = new ListExtension<BGChange>()
 		{
@@ -47,7 +43,11 @@ public class BMSPattern
 	public void AddNote(int line, int bar, double beat, double beatLength, int keySound, int extra)
 	{
 		if (extra == -1) Lines[line].LandMineList.Add(new Note(bar, keySound, beat, beatLength, extra));
-		else Lines[line].NoteList.Add(new Note(bar, keySound, beat, beatLength, extra));
+		else
+		{
+			++NoteCount;
+			Lines[line].NoteList.Add(new Note(bar, keySound, beat, beatLength, extra));
+		}
 	}
 
 	public void AddBGSound(int bar, double beat, double beatLength, int keySound)

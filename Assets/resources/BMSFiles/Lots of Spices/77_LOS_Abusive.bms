@@ -2,7 +2,7 @@
 *---------------------- HEADER FIELD
 
 #PLAYER 1
-#GENRE Tribecore <Reccomend|HS-FIX=off&HS=Usual*0.75>
+#GENRE Tribecore
 #TITLE Lots Of Spices [Abusive]
 #ARTIST Hammer Switch / BGA:Johnny / obj:.ctc
 #bpm 99
@@ -11,7 +11,7 @@
 
 
 #DIFFICULTY 1
-#TOTAL 450FLAN
+#TOTAL 450
 #STAGEFILE _title_01.png
 #BANNER _title_banner.png
 #LNOBJ ZZ

@@ -97,6 +97,18 @@ public class Stop : BMSObject
 	}
 }
 
+public class BMSResult
+{
+	public int Pgr { get; set; }
+	public int Gr { get; set; }
+	public int Good { get; set; }
+	public int Bad { get; set; }
+	public int Poor { get; set; }
+	public int Score { get; set; }
+	public double Accaurcy { get; set; }
+
+}
+
 public class Utility {
 
 	public static double DAbs(double value) => (value > 0) ? value : -value;

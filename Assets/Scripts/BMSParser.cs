@@ -20,58 +20,33 @@ public class BMSParser : MonoBehaviour {
         }
     }
 
-    public BMSDrawer Drawer;
 	//public SpriteRenderer bg;
+	public BMSPattern Pat { get; private set; }
+	public BMSHeader Header { get; private set; }
+	public BMSDrawer Drawer;
     public SoundManager Sm;
-    public BMSHeader Header { get; private set; }
-    public BMSPattern Pat { get; private set; }
-    private string Path;
+	public GameUIManager GameUI;
     private string[] BmsFile { get; set; }
     private List<double> ExBpms;
+	private List<string> KeySoundPathes;
 
     private void Awake()
     {
+		KeySoundPathes = new List<string>()
+		{
+			Capacity = 1000
+		};
         ExBpms = new List<double>()
         {
             Capacity = 3
         };
         Sm = GetComponent<SoundManager>();
-        Path =
-		//"BMSFiles/CrystalWorld/"
-		//"BMSFiles/EndTime/"
-		//"BMSFiles/JackTheRipper/"
-		//"BMSFiles/Halcyon/"
-		//"BMSFiles/YumeLyrith/"
-		//"BMSFiles/EOS_master0906/"
-		//"BMSFiles/Doppelganger_LeaF/"
-		//"BMSFiles/Aleph0/"
-		//"BMSFiles/DeadSoul/"
-		//"BMSFiles/Lots of Spices/"
-		//"BMSFiles/Engine/"
-		//"BMSFiles/3rd Avenue/"
-		//"BMSFiles/AliceInMisanthrope/"
-		"BMSFiles/Castorpollux/"
-		;
-        GetFile(Resources.Load<TextAsset>(Path +
-			//"_crystal-world_r_7a"
-			//"EndTimeTB"	
-			//"jacktheripper_29a"
-			//"_hal_A"
-			//"_7ANOTHER"
-			//"eos_h"
-			//"_A7"
-			//"_7ANOTHER"
-			//"soundsouler_deadsoul_Revive"
-			//"778_LOSmineds"
-			//"engine_XYZ"
-			//"3AE7_XYZ"
-			//"_7HYPER"
-			"__sp_castorpollux_06_spap"
-			));
 
+		GetFile();
 		Init();
-		ParseHeader();
-        Sm.AddAudioClips(Path, Pat.KeySounds);
+		ParseGameHeader();
+        Sm.AddAudioClips();
+		GameUI.LoadImages();
         ParseMainData();
         Pat.GetBeatsAndTimings();
 		Drawer.DrawNotes();
@@ -79,12 +54,11 @@ public class BMSParser : MonoBehaviour {
         //Debug.Log(path + header.BGImagePath);
         //bg.sprite = Resources.Load<Sprite>(path + header.BGImagePath);
         //bg.color = new Color(1, 1, 1, 0.5f);
-        
     }
 
     public void Init()
     {
-        Header = new BMSHeader();
+        //Header = new BMSHeader();
         Pat = new BMSPattern();
     }
 
@@ -94,53 +68,42 @@ public class BMSParser : MonoBehaviour {
         BmsFile = text.text.Split(delim);
     }
 
-    public void ParseHeader()
+	public void GetFile()
+	{
+		Header = BMSFileSystem.SelectedHeader;
+		BmsFile = System.IO.File.ReadAllLines(BMSFileSystem.SelectedPath);
+	}
+
+    public void ParseGameHeader()
     {
-        int prevKeySoundIdx = 0;
 		foreach (string s in BmsFile)
 		{
 			if (s.Length <= 3) continue;
 
-			if (s.Length > 10 && string.Compare(s.Substring(0, 10), "#PLAYLEVEL") == 0) Header.Level = int.Parse(s.Substring(11));
-			else if (s.Length > 11 && string.Compare(s.Substring(0, 10), "#STAGEFILE") == 0) Header.BGImagePath = s.Substring(11, s.Length - 15);
-			else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#PLAYER") == 0) Header.Player = s[8] - '0';
-			else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#ARTIST") == 0) Header.Artist = s.Substring(8, s.Length - 8);
-			else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#LNTYPE") == 0) Header.LnType |= (BMSHeader.Lntype)(1 << (s[8] - '0'));
+			if (s.Length >= 4 && string.Compare(s.Substring(0, 4), "#WAV") == 0)
+			{
+				int key = Decode36(s.Substring(4, 2));
+				string path = s.Substring(7, s.Length - 11);
+				Sm.Pathes.Add(key, path);
+			}
 			else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#LNOBJ") == 0)
 			{
 				Header.Lnobj = Decode36(s.Substring(7, 2));
 				Header.LnType |= BMSHeader.Lntype.LNOBJ;
 			}
-			else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#GENRE") == 0) Header.Genre = s.Substring(7);
-			else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#TITLE") == 0) Header.Title = s.Substring(7);
-			else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#TOTAL") == 0) Header.Total = double.Parse(s.Substring(7));
-			else if (s.Length >= 5 && string.Compare(s.Substring(0, 5), "#RANK") == 0) Header.Rank = int.Parse(s.Substring(6));
-			else if (s.Length >= 4 && string.Compare(s.Substring(0, 4), "#WAV") == 0)
-			{
-				int idx = Decode36(s.Substring(4, 2));
-				if (idx == prevKeySoundIdx + 1)
-				{
-					Pat.KeySounds.Add(s.Substring(7, s.Length - 11));
-					++prevKeySoundIdx;
-				}
-				else
-				{
-					for (int i = prevKeySoundIdx + 1; i < idx; ++i)
-					{
-						Pat.KeySounds.Add(string.Empty);
-
-					}
-					Pat.KeySounds.Add(s.Substring(7, s.Length - 11));
-					prevKeySoundIdx = idx;
-				}
-			}
 			else if (s.Length >= 6 && string.Compare(s.Substring(0, 4), "#BMP") == 0)
 			{
 				string key = s.Substring(4, 2);
 				string extend = s.Substring(s.Length - 3, 3);
-				string videoPath = Path + s.Substring(7, s.Length - 11);
-				Debug.Log($"{key}/{extend}/{videoPath}");
-				if (extend.CompareTo("mpg") == 0) Pat.BGVideoTable.Add(key, Resources.Load<UnityEngine.Video.VideoClip>(videoPath));
+				string Path = s.Substring(7, s.Length - 7);
+				if (string.Compare(extend,"mpg", true) == 0)
+				{
+					Pat.BGVideoTable.Add(key, Path);
+				}
+				else if(string.Compare(extend, "bmp", true) == 0)
+				{
+					GameUI.BGImageTable.Add(key, Path);
+				}
 			}
 			else if (s.Length >= 6 && string.Compare(s.Substring(0, 4), "#BPM") == 0)
             {
@@ -159,7 +122,7 @@ public class BMSParser : MonoBehaviour {
                 {
 					string sub = s.Substring(5, 2);
                     double stopDuration = int.Parse(s.Substring(8)) / 192.0;
-                    //pat.LegacyStopDurations.Add(stopDuration); // 나누기 192
+                    //pat.LegacyStopDuratns.Add(stopDuration); // 나누기 192
 					if (!Pat.StopDurations.ContainsKey(sub))
 					{
 						Pat.StopDurations.Add(sub, stopDuration);
@@ -277,12 +240,20 @@ public class BMSParser : MonoBehaviour {
                 else if (s[5] == '4')
                 {
                     beatLength = (s.Length - 7) / 2;
-                    for (int i = 7; i < s.Length - 1; i += 2)
-                    {
-                        string key = s.Substring(i, 2);
-						if (Pat.BGVideoTable.ContainsKey(key))
-							if (string.Compare(key, "00") != 0) Pat.AddBGAChange(bar, (i - 7) / 2, beatLength, key);
-                    }
+					for (int i = 7; i < s.Length - 1; i += 2)
+					{
+						string key = s.Substring(i, 2);
+
+						if (string.Compare(key, "00") != 0)
+							if (Pat.BGVideoTable.ContainsKey(key))
+							{
+								Pat.AddBGAChange(bar, (i - 7) / 2, beatLength, key);
+							}
+							else
+							{
+								Pat.AddBGAChange(bar, (i - 7) / 2, beatLength, key, true);
+							}
+					}
                 }
                 else if (s[5] == '8')
                 {

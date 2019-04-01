@@ -2,8 +2,20 @@
 using System.Collections;
 using System.Collections.Generic;
 
+public class BMSSongInfo
+{
+	public List<BMSHeader> Headers;
+	public string SongName;
+	public BMSSongInfo()
+	{
+		Headers = new List<BMSHeader>() { Capacity = 4 };
+	}
+
+}
+
 public class BMSHeader
 {
+	public string ParentPath { get; set; }
     [Flags]
     public enum Lntype { NONE = 0, LN1 = 1 << 1, LN2 = 1 << 2, LNOBJ = 1 << 3}
 
