@@ -18,7 +18,7 @@ public class BMSFileSystem : MonoBehaviour {
 	private SelUIManager UI;
 	private static string RootPath;
 
-	private void Awake () {
+	private void Awake() {
 		if (string.IsNullOrEmpty(RootPath))
 		{
 #if UNITY_EDITOR
@@ -46,15 +46,15 @@ public class BMSFileSystem : MonoBehaviour {
 			.Where(s => s.EndsWith(".bms") || s.EndsWith(".bme") || s.EndsWith(".bml")).ToArray();
 
 		if (Files.Length == 0) return;
-		foreach(string path in Files)
+		foreach (string path in Files)
 		{
-			StreamReader reader = new StreamReader(path);
+			StreamReader reader = new StreamReader(path, Encoding.GetEncoding(932));
 			BMSHeader header = new BMSHeader();
 			string s;
 			header.ParentPath = path;
 
 			bool errorFlag = false;
-			while((s = reader.ReadLine()) != null)
+			while ((s = reader.ReadLine()) != null)
 			{
 				if (s.Length <= 3) continue;
 
@@ -81,7 +81,6 @@ public class BMSFileSystem : MonoBehaviour {
 							if ((idx = header.Title.LastIndexOf('[')) >= 0)
 							{
 								string name = header.Title.Remove(idx);
-								Debug.Log(name);
 								if (string.IsNullOrEmpty(songinfo.SongName) || songinfo.SongName.Length > name.Length)
 									songinfo.SongName = name;
 								header.Subtitle = header.Title.Substring(idx).Trim('[', ']');
