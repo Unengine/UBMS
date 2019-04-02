@@ -1,34 +1,24 @@
 ﻿using System.Collections;
 using System.IO;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Video;
 
 public class BMSGameManager : MonoBehaviour
 {
 	public bool IsAuto = true;
-	public static float Speed = 7f;
-	public static double Scroll;
+	public double Scroll;
+	public static float Speed = 3f;
+	public static bool IsPaused;
 
+	[SerializeField]
+	private BMSDrawer Drawer;
 	[SerializeField]
 	private GameUIManager GameUI;
 	[SerializeField]
 	private Transform NoteParent;
 	[SerializeField]
 	private VideoPlayer Video;
-	[SerializeField]
-	private UnityEngine.UI.RawImage Bga;
-	[SerializeField]
-	private UnityEngine.UI.Slider HPBar;
-	[SerializeField]
-	private UnityEngine.UI.Text FSText;
-	[SerializeField]
-	private UnityEngine.UI.Text BPMText;
-	[SerializeField]
-	private UnityEngine.UI.Text ScoreText;
-	[SerializeField]
-	private UnityEngine.UI.Text StatisticsText;
-	[SerializeField]
-	private UnityEngine.UI.Text ComboText;
 	[SerializeField]	
 	private Animator[] KeyPresses;
 	[SerializeField]
@@ -44,26 +34,62 @@ public class BMSGameManager : MonoBehaviour
 	[SerializeField]
 	private double StopTime = 0;
 	[SerializeField]
-	private bool IsPaused = true;
-	[SerializeField]
 	private int HitCount = 0;
-	private BMSResult res;
+
+	private BMSResult Res;
 	private JudgeManager Judge;
-	private Animator ComboAnim;
 	private BMSPattern Pat;
 	private SoundManager Sm;
 	private KeyCode[] Keys;
-	private float Hp = 1;
 	private double CurrentBPM;
+	private float Hp = 1;
 	private int Combo = 0;
 
+	private IEnumerator PreLoad()
+	{
+		BMSParser.Instance.Parse();
+		Pat = BMSParser.Instance.Pat;
+
+		Sm.AddAudioClips();
+		GameUI.LoadImages();
+		Pat.GetBeatsAndTimings();
+		Drawer.DrawNotes();
+		CurrentBPM = Pat.Bpms.Peek.Bpm;
+		Pat.Bpms.RemoveLast();
+				GameUI.UpdateBPMText(CurrentBPM);
+
+		if (Video.isActiveAndEnabled)
+		{
+			for (int i = Pat.BGAChanges.Count - 1; i > -1; --i)
+			{
+				if (!Pat.BGAChanges[i].IsPic)
+				{
+					Video.url = "file://" + Directory.GetParent(BMSFileSystem.SelectedPath) + "/" + Pat.BGVideoTable[Pat.BGAChanges[i].Key];
+					break;
+				}
+			}
+
+			Video.Prepare();
+			yield return new WaitUntil(() => Video.isPrepared);
+			Debug.Log("Video Prepared");
+
+			Video.gameObject.GetComponent<UnityEngine.UI.RawImage>().texture = Video.texture;
+			//Debug.Log(Video.clip.height + "/" + Video.clip.width);
+			Video.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(600, Video.clip.height / Video.clip.width * 600);
+		}
+
+		yield return new WaitUntil(() => Sm.IsPrepared);
+		IsPaused = false;
+	}
+
 	// Use this for initialization
-	private IEnumerator Start()
+	private void Awake()
 	{
 		Application.runInBackground = true;
+		IsPaused = true;
 		Pat = BMSParser.Instance.Pat;
 		Sm = GetComponent<SoundManager>();
-		res = new BMSResult();
+		Res = new BMSResult();
 		Keys = new KeyCode[9];
 		Keys[0] = KeyCode.S;
 		Keys[1] = KeyCode.D;
@@ -74,47 +100,33 @@ public class BMSGameManager : MonoBehaviour
 		Keys[6] = KeyCode.Escape;
 		Keys[7] = KeyCode.K;
 		Keys[8] = KeyCode.L;
-		ComboAnim = ComboText.GetComponent<Animator>();
 		Judge = JudgeManager.instance;
 
-		if (Video.isActiveAndEnabled)
-		{
-			for(int i = Pat.BGAChanges.Count - 1; i > -1; --i)
-			{
-				if(!Pat.BGAChanges[i].IsPic)
-				{
-					Video.url = "file://" + Directory.GetParent(BMSFileSystem.SelectedPath) + "/" + Pat.BGVideoTable[Pat.BGAChanges[i].Key];
-					break;
-				}
-			}
-			
-			Video.Prepare();
-			yield return new WaitUntil(() => Video.isPrepared);
-			Debug.Log("video prepare done");
-			
-			Video.gameObject.GetComponent<UnityEngine.UI.RawImage>().texture = Video.texture;
-			//Debug.Log(Video.clip.height + "/" + Video.clip.width);
-			Video.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(600, Video.clip.height / Video.clip.width * 600);
-		}
-
-		yield return new WaitUntil(() => Sm.IsPrepared);
-		CurrentBPM = Pat.Bpms.Peek.Bpm;
-		Pat.Bpms.RemoveLast();
-		UpdateBPMText(CurrentBPM);
-		IsPaused = false;
+		StartCoroutine(PreLoad());
 	}
 
 	private void Update()
 	{
-		if (IsPaused || IsAuto) return;
+		if (IsAuto) return;
 
 		for (int i = 0; i < Keys.Length; ++i)
 		{
-			Note n = (Pat.Lines[i].NoteList.Count > 0) ? Pat.Lines[i].NoteList.Peek : null;
-			if (Input.GetKeyDown(Keys[i]))
+			if(Input.GetKeyDown(Keys[i]))
 			{
 				KeyPresses[i].Rebind();
 				KeyPresses[i].Play("Press");
+			}
+
+			if (Input.GetKey(Keys[i]))
+			{
+				KeyPresses[i].speed = 0;
+			}
+			else KeyPresses[i].speed = 1;
+
+			if (IsPaused) continue;
+			Note n = (Pat.Lines[i].NoteList.Count > 0) ? Pat.Lines[i].NoteList.Peek : null;
+			if (Input.GetKeyDown(Keys[i]))
+			{
 				if (n != null && n.Extra != 1)
 				{
 					Sm.PlayKeySound(n.KeySound);
@@ -130,12 +142,6 @@ public class BMSGameManager : MonoBehaviour
 					HandleNote(Pat.Lines[i], i);
 				}
 			}
-
-			if (Input.GetKey(Keys[i]))
-			{
-				KeyPresses[i].speed = 0;
-			}
-			else KeyPresses[i].speed = 1;
 		}
 	}
 
@@ -146,13 +152,11 @@ public class BMSGameManager : MonoBehaviour
 		{
 			if (!Pat.BGAChanges.Peek.IsPic)
 			{
-				Debug.Log("play video");
 				Video.Play();
 			}
 			else
 			{
-				if (GameUI.BGSprites.ContainsKey(Pat.BGAChanges.Peek.Key))
-					Bga.texture = GameUI.BGSprites[Pat.BGAChanges.Peek.Key];
+				GameUI.ChangeBGA(Pat.BGAChanges.Peek.Key);
 			}
 			Pat.BGAChanges.RemoveLast();
 		}
@@ -209,7 +213,7 @@ public class BMSGameManager : MonoBehaviour
 				double diff = next.Timing - prevTime;
 				avg += CurrentBPM * diff;
 				CurrentBPM = (next as BPM).Bpm;
-				UpdateBPMText(CurrentBPM);
+				GameUI.UpdateBPMText(CurrentBPM);
 				prevTime = next.Timing;
 				Pat.Bpms.RemoveLast();
 			}
@@ -272,9 +276,7 @@ public class BMSGameManager : MonoBehaviour
 		if (n.Extra == -1 && Judge.Judge(n, CurrentTime) == JudgeType.PGREAT)
 		{
 			Debug.Log("bomb");
-			ComboText.text = "LANDMINE!";
-			ComboAnim.Rebind();
-			ComboAnim.Play("ComboUp");
+			GameUI.ComboUpTxt("LANDMINE!");
 			n.Extra = -2;
 		}
 
@@ -298,25 +300,23 @@ public class BMSGameManager : MonoBehaviour
 		}
 		if (result > JudgeType.BAD)
 		{
-			ComboText.text = result + " " + ++Combo;
+			GameUI.ComboUpTxt(result, ++Combo);
 		}
 		else
 		{
 			Combo = 0;
-			ComboText.text = result.ToString();
+			GameUI.ComboUpTxt(result.ToString());
 		}
 
 		if (Combo > 0)
 		{
-			ComboAnim.Rebind();
-			ComboAnim.Play("ComboUp");
 			Explodes[idx].Rebind();
 			Explodes[idx].Play("KeyExplode");
 		}
 
 		UpdateScore(result);
 		if (result != JudgeType.POOR)
-			UpdateFSText((float)(n.Timing - CurrentTime) * 1000);
+			GameUI.UpdateFSText((float)(n.Timing - CurrentTime) * 1000);
 	}
 
 	private void PlayNotes()
@@ -389,72 +389,45 @@ public class BMSGameManager : MonoBehaviour
 
 	}
 
-	public void UpdateBPMText(double bpm)
-	{
-		if (bpm >= 1000 || bpm < 0) bpm = 0;
-		BPMText.text = "BPM\n" + ((int)bpm).ToString("D3");
-	}
-
-	public void UpdateFSText(double diff)
-	{
-		if (Utility.DAbs(diff) <= 21.0)
-		{
-			FSText.text = string.Empty;
-			return;
-		}
-
-		FSText.text = ((diff > 0) ? "FAST +" : "SLOW -") + Utility.DCeilToInt(Utility.DAbs(diff)) + "ms";
-	}
-
 	public void UpdateScore(JudgeType judge)
 	{
 		if (judge == JudgeType.PGREAT)
 		{
 			AccuracySum += 1;
-			res.Score += 2;
-			++res.Pgr;
+			Res.Score += 2;
+			++Res.Pgr;
 			Hp += (float)BMSFileSystem.SelectedHeader.Total / 100 / Pat.NoteCount;
 			if (Hp > 1) Hp = 1;
 		}
 		else if (judge == JudgeType.GREAT)
 		{
 			AccuracySum += 0.8;
-			res.Score += 1;
-			++res.Gr;
+			Res.Score += 1;
+			++Res.Gr;
 			Hp += (float)BMSFileSystem.SelectedHeader.Total / 100 / Pat.NoteCount;
 			if (Hp > 1) Hp = 1;
 		}
 		else if (judge == JudgeType.GOOD)
 		{
 			AccuracySum += 0.5;
-			++res.Good;
+			++Res.Good;
 			Hp += (float)BMSFileSystem.SelectedHeader.Total / 200 / Pat.NoteCount;
 			if (Hp > 1) Hp = 1;
 		}
 		else if (judge == JudgeType.BAD)
 		{
-			++res.Bad;
+			++Res.Bad;
 			Hp -= 0.02f;
 			if (Hp < 0) Hp = 0;
 		}
 		else
 		{
-			++res.Poor;
+			++Res.Poor;
 			Hp -= 0.04f;
 			if (Hp < 0) Hp = 0;
 		}
 
-		HPBar.value = Hp;
-		ScoreText.text =
-			((int)(Hp * 100)).ToString() + " %\n"
-			+ "\nSCORE : " + res.Score.ToString("D4")
-			+ "\nACCURACY : " + (res.Accaurcy = AccuracySum / HitCount).ToString("P");
-		StatisticsText.text =
-			$"PGREAT : {res.Pgr.ToString("D4")}\n" +
-			$"GREAT : {res.Gr.ToString("D4")}\n" +
-			$"GOOD : {res.Good.ToString("D4")}\n" +
-			$"BAD : {res.Bad.ToString("D4")}\n" +
-			$"POOR : {res.Poor.ToString("D4")}";
+		GameUI.UpdateScore(Res, Hp, Res.Accaurcy = AccuracySum / HitCount);
 	}
 
 	public void ToggleAuto() => IsAuto = !IsAuto;

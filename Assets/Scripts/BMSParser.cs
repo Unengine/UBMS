@@ -23,7 +23,6 @@ public class BMSParser : MonoBehaviour {
 	//public SpriteRenderer bg;
 	public BMSPattern Pat { get; private set; }
 	public BMSHeader Header { get; private set; }
-	public BMSDrawer Drawer;
     public SoundManager Sm;
 	public GameUIManager GameUI;
     private string[] BmsFile { get; set; }
@@ -38,32 +37,17 @@ public class BMSParser : MonoBehaviour {
 		};
 		ExBpms = new Dictionary<string, double>();
         Sm = GetComponent<SoundManager>();
+    }
 
+    public void Parse()
+    {
+		Debug.Log("parse");
+		//Header = new BMSHeader();
+		Pat = new BMSPattern();
 		GetFile();
-		Init();
 		ParseGameHeader();
-        Sm.AddAudioClips();
-		GameUI.LoadImages();
-        ParseMainData();
-        Pat.GetBeatsAndTimings();
-		Drawer.DrawNotes();
-        Debug.Log("Done parsing");
-        //Debug.Log(path + header.BGImagePath);
-        //bg.sprite = Resources.Load<Sprite>(path + header.BGImagePath);
-        //bg.color = new Color(1, 1, 1, 0.5f);
-    }
-
-    public void Init()
-    {
-        //Header = new BMSHeader();
-        Pat = new BMSPattern();
-    }
-
-    public void GetFile(TextAsset text)
-    {
-        char[] delim = new char[] { '\n', '\r' };
-        BmsFile = text.text.Split(delim);
-    }
+		ParseMainData();
+	}
 
 	public void GetFile()
 	{
@@ -71,7 +55,7 @@ public class BMSParser : MonoBehaviour {
 		BmsFile = System.IO.File.ReadAllLines(BMSFileSystem.SelectedPath);
 	}
 
-    public void ParseGameHeader()
+    private void ParseGameHeader()
     {
 		foreach (string s in BmsFile)
 		{
@@ -86,18 +70,18 @@ public class BMSParser : MonoBehaviour {
 			else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#LNOBJ", true) == 0)
 			{
 				Header.Lnobj = Decode36(s.Substring(7, 2));
-				Header.LnType |= BMSHeader.Lntype.LNOBJ;
+				Header.LnType |= Lntype.LNOBJ;
 			}
 			else if (s.Length >= 6 && string.Compare(s.Substring(0, 4), "#BMP", true) == 0)
 			{
 				string key = s.Substring(4, 2);
 				string extend = s.Substring(s.Length - 3, 3);
 				string Path = s.Substring(7, s.Length - 7);
-				if (string.Compare(extend,"mpg", true) == 0)
+				if (string.Compare(extend, "mpg", true) == 0)
 				{
 					Pat.BGVideoTable.Add(key, Path);
 				}
-				else if(string.Compare(extend, "bmp", true) == 0)
+				else if (string.Compare(extend, "bmp", true) == 0)
 				{
 					GameUI.BGImageTable.Add(key, Path);
 				}
@@ -107,41 +91,44 @@ public class BMSParser : MonoBehaviour {
 				}
 			}
 			else if (s.Length >= 6 && string.Compare(s.Substring(0, 4), "#BPM", true) == 0)
-            {
-                if (s[4] == ' ')
-                    Header.Bpm = double.Parse(s.Substring(5));
-                else
-                {
+			{
+				if (s[4] == ' ')
+					Header.Bpm = double.Parse(s.Substring(5));
+				else
+				{
 					string key = s.Substring(4, 2);
 					double bpm = double.Parse(s.Substring(7));
-                    //Debug.Log(exBpms.Count + "/" + bpm);
-                    ExBpms.Add(key, bpm);
-                }
-            }
-            else if (s.Length >= 7 && string.Compare(s.Substring(0, 5), "#STOP", true) == 0)
-            {
-                if (s[7] == ' ')
-                {
+					//Debug.Log(exBpms.Count + "/" + bpm);
+					ExBpms.Add(key, bpm);
+				}
+			}
+			else if (s.Length >= 7 && string.Compare(s.Substring(0, 5), "#STOP", true) == 0)
+			{
+				if (s[7] == ' ')
+				{
 					string sub = s.Substring(5, 2);
-                    double stopDuration = int.Parse(s.Substring(8)) / 192.0;
-                    //pat.LegacyStopDuratns.Add(stopDuration); // 나누기 192
+					double stopDuration = int.Parse(s.Substring(8)) / 192.0;
+					//pat.LegacyStopDuratns.Add(stopDuration); // 나누기 192
 					if (!Pat.StopDurations.ContainsKey(sub))
 					{
 						Pat.StopDurations.Add(sub, stopDuration);
 					}
-                }
-            }
-        }
+				}
+			}
+			else if (s.Length >= 30 && s.CompareTo("*---------------------- MAIN DATA FIELD") == 0) break;
+
+		}
     }
 
-    public void ParseMainData()
+    private void ParseMainData()
     {
-        bool ifBlockOpen = false;
+		bool ifBlockOpen = false;
         bool isIfVaild = false;
 		double beatC = 1.0f;
 		int RandomValue = 1;
 
 		int LNBits = 0;
+		System.Random rand = new System.Random();
 
         foreach(string s in BmsFile)
         {
@@ -150,7 +137,8 @@ public class BMSParser : MonoBehaviour {
 
 			if (s.Length >= 9 && string.Compare(s.Substring(0, 7), "#random", true) == 0)
 			{
-				RandomValue = Random.Range(1, int.Parse(s.Substring(8)) + 1);
+				//RandomValue = Random.Range(1, int.Parse(s.Substring(8)) + 1);
+				RandomValue = rand.Next(1, int.Parse(s.Substring(8)) + 1);
 				continue;
 			}
 
@@ -170,7 +158,6 @@ public class BMSParser : MonoBehaviour {
                 isIfVaild = false;
                 continue;
             }
-
 			if (ifBlockOpen && !isIfVaild) continue;
 
             int bar;
@@ -200,7 +187,7 @@ public class BMSParser : MonoBehaviour {
 							}
 							else LNBits |= (1 << line);	//write bit
 						}
-						if (Header.LnType.HasFlag(BMSHeader.Lntype.LNOBJ) && keySound == Header.Lnobj)
+						if (Header.LnType.HasFlag(Lntype.LNOBJ) && keySound == Header.Lnobj)
 							Pat.AddNote(line, bar, (i - 7) / 2, beatLength, keySound, 1);
 						else
 							Pat.AddNote(line, bar, (i - 7) / 2, beatLength, keySound, 0);

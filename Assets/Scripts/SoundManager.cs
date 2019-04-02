@@ -30,13 +30,6 @@ public class SoundManager : MonoBehaviour {
     // Use this for initialization
     public IEnumerator CAddAudioClips()
     {
-		//if (!KeySoundObject)
-		//{
-		//	Debug.LogError("No KeySoundObject!");
-		//	return;
-		//}
-
-		//Debug.Log("file://" + Directory.GetParent(BMSFileSystem.SelectedPath) + "/");
 
 		int extensionFailCount = 0;
 		foreach (KeyValuePair<int, string> p in Pathes)

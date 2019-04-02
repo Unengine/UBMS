@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BMSDrawer : MonoBehaviour {
 	
-    public BMSHeader Header;
+    public BMSGameManager Gm;
     public BMSPattern Pat;
     public GameObject NotePrefab;
     public GameObject LongNotePrefab;
@@ -35,7 +35,6 @@ public class BMSDrawer : MonoBehaviour {
     // Use this for initialization
     void Init()
 	{
-		Header = BMSParser.Instance.Header;
 		Pat = BMSParser.Instance.Pat;
 		xPoses = new float[9];
 		//xPoses[0] = -2.125f; 0.875
@@ -56,7 +55,6 @@ public class BMSDrawer : MonoBehaviour {
     public void DrawNotes()
     {
 		Init();
-		Debug.Log("Draw");
 
 		for (int i = 0; i < 9; ++i)
 		{
@@ -99,6 +97,8 @@ public class BMSDrawer : MonoBehaviour {
 
 	void OnRenderObject()
 	{
+		if (BMSGameManager.IsPaused) return;
+
 		if (!Mat)
 		{
 			Debug.LogError("BMSDrawer has no material!");
@@ -110,7 +110,7 @@ public class BMSDrawer : MonoBehaviour {
 
 		for (int i = drawIdx; i < Pat.BarCount; ++i)
 		{
-			float y = (float)(Pat.GetPreviousBarBeatSum(i) * BMSGameManager.Speed - BMSGameManager.Scroll);
+			float y = (float)(Pat.GetPreviousBarBeatSum(i) * BMSGameManager.Speed - Gm.Scroll);
 			if (y < 0.25f)
 			{
 				drawIdx = i - 1;
