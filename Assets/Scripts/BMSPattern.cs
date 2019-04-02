@@ -93,6 +93,10 @@ public class BMSPattern
 		{
 			c.CalculateBeat(GetPreviousBarBeatSum(c.Bar), GetBeatC(c.Bar));
 			c.Timing = GetTimingInSecond(c);
+			int idx = Stops.Count - 1;
+			double sum = 0;
+			while (idx > 0 && c.Beat > Stops[--idx].Beat) sum += StopDurations[Stops[idx].Key] / GetBPM(Stops[idx].Beat) * 240;
+			c.Timing += sum;
 		}
 		BGAChanges.Sort();
 		//GET BGCHANGE

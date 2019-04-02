@@ -57,7 +57,7 @@ public class SoundManager : MonoBehaviour {
 				}
 				if (extensionFailCount >= SoundExtensions.Length - 1)
 				{
-					Debug.LogError("Failed to read sound data");
+					Debug.LogWarning($"Failed to read sound data : {www.url}");
 					break;
 				}
 				url.Replace(SoundExtensions[extensionFailCount], SoundExtensions[extensionFailCount + 1]);

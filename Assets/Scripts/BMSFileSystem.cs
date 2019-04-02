@@ -104,7 +104,12 @@ public class BMSFileSystem : MonoBehaviour {
 								songinfo.SongName = header.Title;
 						}
 					}
-					else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#TOTAL") == 0) header.Total = double.Parse(s.Substring(7));
+					else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#TOTAL") == 0)
+					{
+						double tot = 160;
+						double.TryParse(s.Substring(7), out tot);
+						header.Total = tot;
+					}
 					else if (s.Length >= 5 && string.Compare(s.Substring(0, 5), "#RANK") == 0) header.Rank = int.Parse(s.Substring(6));
 					else if (s.Length >= 6 && string.Compare(s.Substring(0, 4), "#BPM") == 0) header.Bpm = double.Parse(s.Substring(5));
 					else if (s.Length >= 6 && string.Compare(s.Substring(0, 4), "#WAV") == 0) break;

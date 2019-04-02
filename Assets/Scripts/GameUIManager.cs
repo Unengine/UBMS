@@ -33,9 +33,18 @@ public class GameUIManager : MonoBehaviour
 			WWW www = new WWW(path);
 
 			yield return www;
-			BMPLoader loader = new BMPLoader();
-			BMPImage img = loader.LoadBMP(www.bytes);
-			Texture2D t = img.ToTexture2D();
+
+			Texture2D t = null;
+			if (www.url.EndsWith("bmp", System.StringComparison.OrdinalIgnoreCase))
+			{
+				BMPLoader loader = new BMPLoader();
+				BMPImage img = loader.LoadBMP(www.bytes);
+				t = img.ToTexture2D();
+			}
+			else if (www.url.EndsWith("png", System.StringComparison.OrdinalIgnoreCase))
+			{
+				t = www.texture;
+			}
 
 			BGSprites.Add(p.Key, t);
 

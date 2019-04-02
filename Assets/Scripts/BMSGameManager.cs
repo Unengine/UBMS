@@ -6,7 +6,7 @@ using UnityEngine.Video;
 public class BMSGameManager : MonoBehaviour
 {
 	public bool IsAuto = true;
-	public static float Speed = 8f;
+	public static float Speed = 7f;
 	public static double Scroll;
 
 	[SerializeField]
@@ -148,14 +148,12 @@ public class BMSGameManager : MonoBehaviour
 			{
 				Debug.Log("play video");
 				Video.Play();
-				Debug.Log(Video.clip.name);
 			}
 			else
 			{
 				if (GameUI.BGSprites.ContainsKey(Pat.BGAChanges.Peek.Key))
 					Bga.texture = GameUI.BGSprites[Pat.BGAChanges.Peek.Key];
 			}
-
 			Pat.BGAChanges.RemoveLast();
 		}
 
@@ -415,7 +413,7 @@ public class BMSGameManager : MonoBehaviour
 			AccuracySum += 1;
 			res.Score += 2;
 			++res.Pgr;
-			Hp += 6.0f / Pat.NoteCount;
+			Hp += (float)BMSFileSystem.SelectedHeader.Total / 100 / Pat.NoteCount;
 			if (Hp > 1) Hp = 1;
 		}
 		else if (judge == JudgeType.GREAT)
@@ -423,14 +421,14 @@ public class BMSGameManager : MonoBehaviour
 			AccuracySum += 0.8;
 			res.Score += 1;
 			++res.Gr;
-			Hp += 6.0f / Pat.NoteCount;
+			Hp += (float)BMSFileSystem.SelectedHeader.Total / 100 / Pat.NoteCount;
 			if (Hp > 1) Hp = 1;
 		}
 		else if (judge == JudgeType.GOOD)
 		{
 			AccuracySum += 0.5;
 			++res.Good;
-			Hp += 3.0f / Pat.NoteCount;
+			Hp += (float)BMSFileSystem.SelectedHeader.Total / 200 / Pat.NoteCount;
 			if (Hp > 1) Hp = 1;
 		}
 		else if (judge == JudgeType.BAD)

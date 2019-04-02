@@ -19,7 +19,6 @@ public class BMSHeader
     [Flags]
     public enum Lntype { NONE = 0, LN1 = 1 << 1, LN2 = 1 << 2, LNOBJ = 1 << 3}
 
-    public int RandomValue { get; set; }
     public int Level { get; set; }
     public int Player { get; set; }
 	public string BGImagePath { get; set; }
