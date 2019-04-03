@@ -6,7 +6,7 @@ using UnityEngine.Video;
 
 public class BMSGameManager : MonoBehaviour
 {
-	public bool IsAuto = true;
+	public bool IsAuto = false;
 	public double Scroll;
 	public static float Speed = 3f;
 	public static bool IsPaused;
@@ -50,14 +50,16 @@ public class BMSGameManager : MonoBehaviour
 	{
 		BMSParser.Instance.Parse();
 		Pat = BMSParser.Instance.Pat;
-
+		GameUI.ComboUpTxt("Loading...");
+		GameUI.LoadBackBmp();
+		GameUI.Bga.rectTransform.sizeDelta = new Vector2(298, 349);
 		Sm.AddAudioClips();
 		GameUI.LoadImages();
 		Pat.GetBeatsAndTimings();
 		Drawer.DrawNotes();
 		CurrentBPM = Pat.Bpms.Peek.Bpm;
 		Pat.Bpms.RemoveLast();
-				GameUI.UpdateBPMText(CurrentBPM);
+		GameUI.UpdateBPMText(CurrentBPM);
 
 		if (Video.isActiveAndEnabled)
 		{
@@ -76,13 +78,17 @@ public class BMSGameManager : MonoBehaviour
 				yield return new WaitUntil(() => Video.isPrepared);
 				Debug.Log("Video Prepared");
 			}
-
-			Video.gameObject.GetComponent<UnityEngine.UI.RawImage>().texture = Video.texture;
-			//Debug.Log(Video.clip.height + "/" + Video.clip.width);
-			Video.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(600, 600);
 		}
 
+		yield return new WaitUntil(() => GameUI.IsPrepared);
 		yield return new WaitUntil(() => Sm.IsPrepared);
+		Debug.Log("Game starts in 2 sec");
+		GameUI.ComboUpTxt("Game Start!");
+		yield return new WaitForSeconds(2);
+		GameUI.UpdateComboText(string.Empty);
+		GameUI.Bga.texture = Video.texture;
+		GameUI.Bga.color = Color.white;
+		GameUI.Bga.rectTransform.sizeDelta = new Vector2(600, 600);
 		BMSFileSystem.SelectedHeader = null;
 		BMSFileSystem.SelectedPath = null;
 		IsPaused = false;
@@ -92,6 +98,7 @@ public class BMSGameManager : MonoBehaviour
 	private void Awake()
 	{
 		Application.runInBackground = true;
+		IsAuto = false;
 		IsPaused = true;
 		Pat = BMSParser.Instance.Pat;
 		Sm = GetComponent<SoundManager>();
@@ -108,6 +115,7 @@ public class BMSGameManager : MonoBehaviour
 		Keys[8] = KeyCode.L;
 		Judge = JudgeManager.instance;
 		Header = BMSFileSystem.SelectedHeader;
+		GameUI.Bga.color = new Color(1, 1, 1, 0);
 		StartCoroutine(PreLoad());
 	}
 

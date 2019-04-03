@@ -8,8 +8,8 @@ using UnityEngine.Networking;
 
 public class GameUIManager : MonoBehaviour
 {
-
 	public bool IsPrepared { get; set; } = false;
+	public RawImage Bga;
 	public Dictionary<string, string> BGImageTable { get; set; }
 	public Dictionary<string, Texture2D> BGSprites { get; set; }
 
@@ -24,8 +24,6 @@ public class GameUIManager : MonoBehaviour
 	[SerializeField]
 	private Text FSText;
 	[SerializeField]
-	private RawImage Bga;
-	[SerializeField]
 	private Text ComboText;
 
 	private Animator ComboAnim;
@@ -36,6 +34,52 @@ public class GameUIManager : MonoBehaviour
 		BGImageTable = new Dictionary<string, string>();
 		BGSprites = new Dictionary<string, Texture2D>();
 		ComboAnim = ComboText.GetComponent<Animator>();
+	}
+
+	public void LoadBackBmp()
+	{
+		if (!string.IsNullOrEmpty(BMSFileSystem.SelectedHeader.BackbmpPath))
+			StartCoroutine(CLoadBackBmp());
+	}
+
+	private IEnumerator CLoadBackBmp()
+	{
+		string path = "file://" + BMSFileSystem.SelectedHeader.ParentPath + "/" + BMSFileSystem.SelectedHeader.BackbmpPath;
+		Debug.Log(path);
+
+		Texture2D t = null;
+		if (path.EndsWith(".bmp", System.StringComparison.OrdinalIgnoreCase))
+		{
+			UnityWebRequest www = UnityWebRequest.Get(path);
+			yield return www.SendWebRequest();
+
+			BMPLoader loader = new BMPLoader();
+			BMPImage img = loader.LoadBMP(www.downloadHandler.data);
+			t = img.ToTexture2D();
+		}
+		else if (path.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase))
+		{
+			UnityWebRequest www = UnityWebRequestTexture.GetTexture(path);
+			yield return www.SendWebRequest();
+
+			t = (www.downloadHandler as DownloadHandlerTexture).texture;
+		}
+
+		//Bga.sprite = Sprite.Create(t, new Rect(0.0f, 0.0f, t.width, t.height), new Vector2(0.5f, 0.5f), 100.0f);
+		Bga.texture = t;
+		float timer = 0;
+		yield return new WaitUntil(() =>
+		{
+			if (timer < 0.4f)
+			{
+				Debug.Log("timer : " + timer);
+				timer += Time.deltaTime;
+				Bga.color = new Color(1, 1, 1, timer * 2.5f);
+				return false;
+			}
+			else return true;
+		});
+		Bga.color = Color.white;
 	}
 
 	public void LoadImages()
@@ -67,11 +111,15 @@ public class GameUIManager : MonoBehaviour
 
 				t = (www.downloadHandler as DownloadHandlerTexture).texture;
 			}
-
 			BGSprites.Add(p.Key, t);
 
 		}
 		IsPrepared = true;
+	}
+
+	public void UpdateComboText(string str)
+	{
+		ComboText.text = str;
 	}
 
 	public void ComboUpTxt(JudgeType judge, int combo)
@@ -91,7 +139,11 @@ public class GameUIManager : MonoBehaviour
 	public void ChangeBGA(string key)
 	{
 		if (BGSprites.ContainsKey(key))
+		{
 			Bga.texture = BGSprites[key];
+			//Texture2D t = BGSprites[key];
+			//Bga.sprite = Sprite.Create(t, new Rect(0.0f, 0.0f, t.width, t.height), new Vector2(0.5f, 0.5f), 100.0f);
+		}
 	}
 
 	public void UpdateFSText(double diff)
