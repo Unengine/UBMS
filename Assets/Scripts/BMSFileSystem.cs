@@ -73,6 +73,7 @@ public class BMSFileSystem : MonoBehaviour {
 					else if (s.Length >= 8 && string.Compare(s.Substring(0, 8), "#PREVIEW") == 0) header.PreviewPath = s.Substring(9, s.Length - 13);
 					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#PLAYER") == 0) header.Player = s[8] - '0';
 					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#ARTIST") == 0) header.Artist = s.Substring(8);
+					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#BANNER") == 0) header.BannerPath = s.Substring(8);
 					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#LNTYPE") == 0) header.LnType |= (Lntype)(1 << (s[8] - '0'));
 					else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#GENRE") == 0) header.Genre = s.Substring(7);
 					else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#TITLE") == 0)
@@ -107,7 +108,7 @@ public class BMSFileSystem : MonoBehaviour {
 				}
 				catch (System.Exception e)
 				{
-					Debug.Log(e);
+					Debug.LogWarning("error parsing " + s + "\n" + e);
 					errorFlag = true;
 					break;
 				}

@@ -17,6 +17,8 @@ public class SelUIManager : MonoBehaviour {
 	[SerializeField]
 	private RectTransform PatternViewport;
 	[SerializeField]
+	private RawImage Banner;
+	[SerializeField]
 	private Text TitleText;
 	[SerializeField]
 	private Text SubTitleText;
@@ -47,13 +49,18 @@ public class SelUIManager : MonoBehaviour {
 			if (BMSGameManager.Speed > 1f)
 			{
 				BMSGameManager.Speed -= 0.5f;
-				UpdateText(SpeedText, "SPEED " + BMSGameManager.Speed.ToString("#.##"));
+
+				UpdateText(SpeedText, "SPEED " + BMSGameManager.Speed.ToString("#.##") +
+					(BMSFileSystem.SelectedHeader != null ?
+					$" ({(BMSGameManager.Speed * BMSFileSystem.SelectedHeader.Bpm).ToString("0")})" : string.Empty));
 			}
 		}
 		else if (Input.GetKeyDown(KeyCode.UpArrow))
 		{
 			BMSGameManager.Speed += 0.5f;
-			UpdateText(SpeedText, "SPEED " + BMSGameManager.Speed.ToString("#.##"));
+			UpdateText(SpeedText, "SPEED " + BMSGameManager.Speed.ToString("#.##") +
+				(BMSFileSystem.SelectedHeader != null ?
+				$" ({(BMSGameManager.Speed * BMSFileSystem.SelectedHeader.Bpm).ToString("0")})" : string.Empty));
 		}
 		else if (IsReady && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)))
 		{
@@ -66,11 +73,12 @@ public class SelUIManager : MonoBehaviour {
 	public void DrawSongUI(BMSSongInfo[] songinfos)
 	{
 		int i = 0;
-		foreach(BMSSongInfo s in songinfos)
+		SongViewport.sizeDelta = new Vector2(0, 71 * songinfos.Length);
+		foreach (BMSSongInfo s in songinfos)
 		{
 			if (s.Headers.Count == 0) continue;
 			GameObject t;
-			(t = Instantiate(ButtonPrefab, SongViewport)).transform.localPosition = new Vector3(300, (50 * songinfos.Length) - (70 * ++i) - 2765);   //2450
+			(t = Instantiate(ButtonPrefab, SongViewport)).transform.localPosition = new Vector3(300, 30 - (70 * ++i));   //2450
 			t.GetComponentInChildren<Text>().text = s.SongName;
 			t.GetComponent<Button>().onClick.AddListener(() =>
 			{
@@ -81,16 +89,15 @@ public class SelUIManager : MonoBehaviour {
 				DrawPatternUI(s, s.Headers.Count);
 			});
 		}
-		SongViewport.sizeDelta = new Vector2(0, 70 * i);
 	}
 
-	public void DrawPatternUI(BMSSongInfo songinfos, int patternCount)
+	public void DrawPatternUI(BMSSongInfo songinfo, int patternCount)
 	{
 		int i = 0;
 		
-		PatternButtons = new GameObject[songinfos.Headers.Count];
-		PatternViewport.sizeDelta = new Vector2(0, 70 * patternCount);
-		foreach (BMSHeader h in songinfos.Headers)
+		PatternButtons = new GameObject[songinfo.Headers.Count];
+		PatternViewport.sizeDelta = new Vector2(0, 71 * patternCount);
+		foreach (BMSHeader h in songinfo.Headers)
 		{
 			GameObject t;
 			(t = Instantiate(ButtonPrefab, PatternViewport)).transform.localPosition = new Vector3(300, 30 - 70 * ++i);   //2450
@@ -98,18 +105,24 @@ public class SelUIManager : MonoBehaviour {
 			t.GetComponentInChildren<Text>().text = h.Level + " - " + (!string.IsNullOrEmpty(h.Subtitle) ? h.Subtitle : h.Title);
 			t.GetComponent<Button>().onClick.AddListener(() =>
 			{
-				if (!PreviewClips.ContainsKey(songinfos) || Preview.clip != PreviewClips[songinfos])
+				if (!PreviewClips.ContainsKey(songinfo) || Preview.clip != PreviewClips[songinfo])
 					Preview.Stop();
-				if(PreviewClips.ContainsKey(songinfos))
+				if (PreviewClips.ContainsKey(songinfo))
 				{
-					Preview.clip = PreviewClips[songinfos];
-					Preview.Play();
+					Preview.clip = PreviewClips[songinfo];
+					if (!Preview.isPlaying)
+						Preview.Play();
 				}
+
+				if (BMSFileSystem.SelectedHeader == null || BMSFileSystem.SelectedHeader.ParentPath.CompareTo(h.ParentPath) != 0)
+					StartCoroutine(LoadBanner(h));
 				BMSFileSystem.SelectedHeader = h;
 				BMSFileSystem.SelectedPath = h.Path;
+				UpdateText(SpeedText, "SPEED " + BMSGameManager.Speed.ToString("#.##") +
+					$" ({(BMSGameManager.Speed * BMSFileSystem.SelectedHeader.Bpm).ToString("0")})");
 
-				if (TitleText.text.CompareTo(songinfos.SongName) != 0)
-					TitleText.text = songinfos.SongName;
+				if (TitleText.text.CompareTo(songinfo.SongName) != 0)
+					TitleText.text = songinfo.SongName;
 				SubTitleText.text = (string.IsNullOrEmpty(h.Subtitle)) ? $"[ Level {h.Level} ]" : $"[ {h.Subtitle} ]";
 				if (GenreText.text.CompareTo(h.Genre) != 0)
 					GenreText.text = $"{h.Artist} / Genre : {h.Genre}";
@@ -120,4 +133,31 @@ public class SelUIManager : MonoBehaviour {
 		}
 	}
 
+	private IEnumerator LoadBanner(BMSHeader h)
+	{
+		if(string.IsNullOrEmpty(h.BannerPath))
+		{
+			Banner.texture = null;
+			yield break;
+		}
+
+		string path = $@"{h.ParentPath}\{WWW.EscapeURL(h.BannerPath).Replace('+', ' ')}";
+		WWW www = new WWW(path);
+		Texture t = null;
+		if (path.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase)) t = www.texture;
+		else if (path.EndsWith(".bmp", System.StringComparison.OrdinalIgnoreCase))
+		{
+			B83.Image.BMP.BMPLoader loader = new B83.Image.BMP.BMPLoader();
+			B83.Image.BMP.BMPImage img = loader.LoadBMP(www.bytes);
+			t = img.ToTexture2D();
+		}
+
+		if (t == null) Debug.LogWarning("Error loading banner");
+		else
+		{
+			Banner.texture = t;
+			Banner.rectTransform.sizeDelta = new Vector2(300, 80);
+		}
+		yield return www;
+	}
 }

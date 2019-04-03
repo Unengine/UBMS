@@ -27,6 +27,7 @@ public class BMSHeader : IComparable<BMSHeader>
 	public int Lnobj { get; set; }
 	public int Level { get; set; }
     public int Player { get; set; }
+	public string BannerPath { get; set; }
 	public string BGImagePath { get; set; }
     public string Artist { get; set; }
     public string Genre { get; set; }

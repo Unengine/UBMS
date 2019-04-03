@@ -52,13 +52,13 @@ public class GameUIManager : MonoBehaviour
 			yield return www;
 
 			Texture2D t = null;
-			if (www.url.EndsWith("bmp", System.StringComparison.OrdinalIgnoreCase))
+			if (www.url.EndsWith(".bmp", System.StringComparison.OrdinalIgnoreCase))
 			{
 				BMPLoader loader = new BMPLoader();
 				BMPImage img = loader.LoadBMP(www.bytes);
 				t = img.ToTexture2D();
 			}
-			else if (www.url.EndsWith("png", System.StringComparison.OrdinalIgnoreCase))
+			else if (www.url.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase))
 			{
 				t = www.texture;
 			}
