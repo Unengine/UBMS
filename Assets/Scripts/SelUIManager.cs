@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class SelUIManager : MonoBehaviour {
 
 	public static float ScrollValue = 1;
+	public Dictionary<BMSSongInfo, AudioClip> PreviewClips;
 	public Scrollbar Scroll;
 	public Text SpeedText;
 
@@ -25,12 +26,15 @@ public class SelUIManager : MonoBehaviour {
 	private Text BPMText;
 	[SerializeField]
 	private GameObject InformText;
+	[SerializeField]
+	private AudioSource Preview;
 
 	private GameObject[] PatternButtons;
 	private bool IsReady = false;
 
 	// Use this for initialization
-	void Start () {
+	void Awake () {
+		PreviewClips = new Dictionary<BMSSongInfo, AudioClip>();
 		UpdateText(SpeedText, "SPEED " + BMSGameManager.Speed.ToString("#.##"));
 		Scroll.value = ScrollValue;
 	}
@@ -64,8 +68,9 @@ public class SelUIManager : MonoBehaviour {
 		int i = 0;
 		foreach(BMSSongInfo s in songinfos)
 		{
+			if (s.Headers.Count == 0) continue;
 			GameObject t;
-			(t = Instantiate(ButtonPrefab, SongViewport)).transform.localPosition = new Vector3(300, (50 * songinfos.Length) - (70 * ++i) - 2770);   //2450
+			(t = Instantiate(ButtonPrefab, SongViewport)).transform.localPosition = new Vector3(300, (50 * songinfos.Length) - (70 * ++i) - 2765);   //2450
 			t.GetComponentInChildren<Text>().text = s.SongName;
 			t.GetComponent<Button>().onClick.AddListener(() =>
 			{
@@ -76,7 +81,7 @@ public class SelUIManager : MonoBehaviour {
 				DrawPatternUI(s, s.Headers.Count);
 			});
 		}
-		SongViewport.sizeDelta = new Vector2(0, 70 * songinfos.Length);
+		SongViewport.sizeDelta = new Vector2(0, 70 * i);
 	}
 
 	public void DrawPatternUI(BMSSongInfo songinfos, int patternCount)
@@ -93,8 +98,15 @@ public class SelUIManager : MonoBehaviour {
 			t.GetComponentInChildren<Text>().text = h.Level + " - " + (!string.IsNullOrEmpty(h.Subtitle) ? h.Subtitle : h.Title);
 			t.GetComponent<Button>().onClick.AddListener(() =>
 			{
+				if (!PreviewClips.ContainsKey(songinfos) || Preview.clip != PreviewClips[songinfos])
+					Preview.Stop();
+				if(PreviewClips.ContainsKey(songinfos))
+				{
+					Preview.clip = PreviewClips[songinfos];
+					Preview.Play();
+				}
 				BMSFileSystem.SelectedHeader = h;
-				BMSFileSystem.SelectedPath = h.ParentPath;
+				BMSFileSystem.SelectedPath = h.Path;
 
 				if (TitleText.text.CompareTo(songinfos.SongName) != 0)
 					TitleText.text = songinfos.SongName;

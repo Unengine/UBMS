@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using UnityEngine;
 using System.Linq;
 using System.Text;
+using System.Collections.Generic;
 
 public class BMSFileSystem : MonoBehaviour {
 
@@ -51,7 +52,8 @@ public class BMSFileSystem : MonoBehaviour {
 			StreamReader reader = new StreamReader(path, Encoding.GetEncoding(932));
 			BMSHeader header = new BMSHeader();
 			string s;
-			header.ParentPath = path;
+			header.Path = path;
+			header.ParentPath = Directory.GetParent(path).ToString();
 
 			bool errorFlag = false;
 			while ((s = reader.ReadLine()) != null)
@@ -68,8 +70,9 @@ public class BMSFileSystem : MonoBehaviour {
 					}
 					else if (s.Length > 11 && string.Compare(s.Substring(0, 10), "#STAGEFILE") == 0) header.BGImagePath = s.Substring(11, s.Length - 15);
 					else if (s.Length >= 9 && string.Compare(s.Substring(0, 9), "#SUBTITLE") == 0) header.Subtitle = s.Substring(10).Trim('[', ']');
+					else if (s.Length >= 8 && string.Compare(s.Substring(0, 8), "#PREVIEW") == 0) header.PreviewPath = s.Substring(9, s.Length - 13);
 					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#PLAYER") == 0) header.Player = s[8] - '0';
-					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#ARTIST") == 0) header.Artist = s.Substring(8, s.Length - 8);
+					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#ARTIST") == 0) header.Artist = s.Substring(8);
 					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#LNTYPE") == 0) header.LnType |= (Lntype)(1 << (s[8] - '0'));
 					else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#GENRE") == 0) header.Genre = s.Substring(7);
 					else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#TITLE") == 0)
@@ -113,9 +116,45 @@ public class BMSFileSystem : MonoBehaviour {
 			if (!errorFlag)
 			{
 				++PatternCount;
+				//Debug.Log($@"file:\\{header.ParentPath}\{header.PreviewPath}");
+				if (!string.IsNullOrEmpty(header.PreviewPath) && !UI.PreviewClips.ContainsKey(songinfo))
+				{
+					StartCoroutine(CLoadPreview(songinfo, header, UI.PreviewClips));
+				}
 				songinfo.Headers.Add(header);
 			}
 		}
 		songinfo.Headers.Sort();
+	}
+
+
+	public IEnumerator CLoadPreview(BMSSongInfo info, BMSHeader header, Dictionary<BMSSongInfo, AudioClip> dic)
+	{
+		string[] SoundExtensions = { ".ogg", ".wav", ".mp3" };
+		string url = $"file://{header.ParentPath}/{header.PreviewPath}";
+		WWW www = null;
+		int extensionFailCount = 0;
+		do
+		{
+			www = new WWW(url + WWW.EscapeURL(SoundExtensions[extensionFailCount]).Replace('+', ' '));
+			//Debug.Log(www.url);
+			if (www.bytes.Length != 0)
+			{
+				yield return www;
+				if (UI.PreviewClips.ContainsKey(info)) break;
+				AudioClip c = www.GetAudioClip(false);
+				c.LoadAudioData();
+				dic.Add(info, c);
+				break;
+			}
+			if (extensionFailCount >= SoundExtensions.Length - 1)
+			{
+				Debug.LogWarning($"Failed to read sound data : {www.url}");
+				break;
+			}
+			url.Replace(SoundExtensions[extensionFailCount], SoundExtensions[extensionFailCount + 1]);
+			++extensionFailCount;
+		}
+		while (www.bytes.Length == 0);
 	}
 }

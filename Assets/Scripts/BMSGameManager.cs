@@ -64,7 +64,7 @@ public class BMSGameManager : MonoBehaviour
 			{
 				if (!Pat.BGAChanges[i].IsPic)
 				{
-					Video.url = "file://" + Directory.GetParent(BMSFileSystem.SelectedPath) + "/" + Pat.BGVideoTable[Pat.BGAChanges[i].Key];
+					Video.url = "file://" + BMSFileSystem.SelectedHeader.ParentPath + "/" + Pat.BGVideoTable[Pat.BGAChanges[i].Key];
 					break;
 				}
 			}

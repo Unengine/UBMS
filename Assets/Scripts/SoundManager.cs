@@ -12,14 +12,16 @@ public class SoundManager : MonoBehaviour {
     public Dictionary<int, string> Pathes { get; set; }
 	public Dictionary<int, AudioClip> Clips { get; set; }
 
-	private string[] SoundExtensions;
+	private static string[] SoundExtensions;
 
 	public void Awake()
 	{
 		//audioSource = GetComponent<AudioSource>();
 		Pathes = new Dictionary<int, string>();
 		Clips = new Dictionary<int, AudioClip>();
-		SoundExtensions = new string[] { ".ogg", ".wav", ".mp3" };
+
+		if (SoundExtensions == null)
+			SoundExtensions = new string[] { ".ogg", ".wav", ".mp3" };
 	}
 
 	public void AddAudioClips()
@@ -28,14 +30,14 @@ public class SoundManager : MonoBehaviour {
 	}
 
     // Use this for initialization
-    public IEnumerator CAddAudioClips()
+    private IEnumerator CAddAudioClips()
     {
-
-		int extensionFailCount = 0;
+		int extensionFailCount;
 		foreach (KeyValuePair<int, string> p in Pathes)
 		{
-			string url = "file://" + Directory.GetParent(BMSFileSystem.SelectedPath) + @"\";
+			string url = "file://" + BMSFileSystem.SelectedHeader.ParentPath + @"\";
 			WWW www = null;
+			extensionFailCount = 0;
 			do
 			{
 				www = new WWW(url + WWW.EscapeURL(p.Value + SoundExtensions[extensionFailCount]).Replace('+', ' '));
@@ -57,7 +59,6 @@ public class SoundManager : MonoBehaviour {
 				++extensionFailCount;
 			}
 			while (www.bytes.Length == 0);
-			extensionFailCount = 0;
 			//clips.Add(Resources.Load<AudioClip>(path + s));
 		}
 
@@ -70,4 +71,5 @@ public class SoundManager : MonoBehaviour {
 		if (Clips.ContainsKey(key))
 			Src.PlayOneShot(Clips[key], volume);
     }
+
 }

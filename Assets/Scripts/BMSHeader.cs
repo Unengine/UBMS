@@ -19,6 +19,7 @@ public enum Lntype { NONE = 0, LN1 = 1 << 1, LN2 = 1 << 2, LNOBJ = 1 << 3 }
 public class BMSHeader : IComparable<BMSHeader>
 {
 	public string ParentPath { get; set; }
+	public string Path { get; set; }
 	public Lntype LnType { get; set; }
 
 
@@ -31,6 +32,7 @@ public class BMSHeader : IComparable<BMSHeader>
     public string Genre { get; set; }
     public string Title { get; set; }
 	public string Subtitle { get; set; }
+	public string PreviewPath { get; set; }
     public double Total { get; set; }
     public double Bpm { get; set; }
 

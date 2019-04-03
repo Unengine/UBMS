@@ -46,7 +46,7 @@ public class GameUIManager : MonoBehaviour
 	{
 		foreach (KeyValuePair<string, string> p in BGImageTable)
 		{
-			string path = "file://" + Directory.GetParent(BMSFileSystem.SelectedPath) + "/" + p.Value;
+			string path = "file://" + BMSFileSystem.SelectedHeader.ParentPath + "/" + p.Value;
 			WWW www = new WWW(path);
 
 			yield return www;
