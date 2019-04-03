@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Linq;
 using System.Text;
 using System.Collections.Generic;
+using UnityEngine.Networking;
 
 public class BMSFileSystem : MonoBehaviour {
 
@@ -25,7 +26,7 @@ public class BMSFileSystem : MonoBehaviour {
 #if UNITY_EDITOR
 			RootPath = @"D:\BMSFiles\";
 #else
-			RootPath = $@"{Application.dataPath}\BMSFiles";
+			RootPath = $@"{Directory.GetParent(Application.dataPath)}\BMSFiles";
 #endif
 			Directories = Directory.GetDirectories(RootPath);
 			Songinfos = new BMSSongInfo[Directories.Length];
@@ -118,9 +119,9 @@ public class BMSFileSystem : MonoBehaviour {
 			{
 				++PatternCount;
 				//Debug.Log($@"file:\\{header.ParentPath}\{header.PreviewPath}");
-				if (!string.IsNullOrEmpty(header.PreviewPath) && !UI.PreviewClips.ContainsKey(songinfo))
+				if (!string.IsNullOrEmpty(header.PreviewPath) && !SelUIManager.PreviewClips.ContainsKey(songinfo))
 				{
-					StartCoroutine(CLoadPreview(songinfo, header, UI.PreviewClips));
+					StartCoroutine(CLoadPreview(songinfo, header, SelUIManager.PreviewClips));
 				}
 				songinfo.Headers.Add(header);
 			}
@@ -132,8 +133,9 @@ public class BMSFileSystem : MonoBehaviour {
 	public IEnumerator CLoadPreview(BMSSongInfo info, BMSHeader header, Dictionary<BMSSongInfo, AudioClip> dic)
 	{
 		string[] SoundExtensions = { ".ogg", ".wav", ".mp3" };
+		AudioType type = AudioType.OGGVORBIS;
 		string url = $@"{header.ParentPath}\{header.PreviewPath}";
-		WWW www = null;
+		UnityWebRequest www = null;
 		int extensionFailCount = 0;
 		do
 		{
@@ -144,15 +146,18 @@ public class BMSFileSystem : MonoBehaviour {
 		while (extensionFailCount < SoundExtensions.Length - 1);
 		//clips.Add(Resources.Load<AudioClip>(path + s));
 
-		www = new WWW("file://" + url + WWW.EscapeURL(SoundExtensions[extensionFailCount]).Replace('+', ' '));
-		if (www.bytes.Length != 0)
+		if (string.Compare(SoundExtensions[extensionFailCount], ".wav", true) == 0) type = AudioType.WAV;
+		else if (string.Compare(SoundExtensions[extensionFailCount], ".mp3", true) == 0) type = AudioType.MPEG;
+
+		www = UnityWebRequestMultimedia.GetAudioClip("file://" + url + SoundExtensions[extensionFailCount], type);
+		yield return www.SendWebRequest();
+		if (www.downloadHandler.data.Length != 0)
 		{
-			yield return www;
-			AudioClip c = www.GetAudioClip(false);
+			AudioClip c = DownloadHandlerAudioClip.GetContent(www);
 			c.LoadAudioData();
 
-			if (!UI.PreviewClips.ContainsKey(info))
-				UI.PreviewClips.Add(info, c);
+			if (!SelUIManager.PreviewClips.ContainsKey(info))
+				SelUIManager.PreviewClips.Add(info, c);
 		}
 		else
 		{

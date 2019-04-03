@@ -1,12 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.UI;
 
 public class SelUIManager : MonoBehaviour {
 
 	public static float ScrollValue = 1;
-	public Dictionary<BMSSongInfo, AudioClip> PreviewClips;
+	public static Dictionary<BMSSongInfo, AudioClip> PreviewClips;
 	public Scrollbar Scroll;
 	public Text SpeedText;
 
@@ -36,13 +37,17 @@ public class SelUIManager : MonoBehaviour {
 
 	// Use this for initialization
 	void Awake () {
-		PreviewClips = new Dictionary<BMSSongInfo, AudioClip>();
+		if (PreviewClips == null)
+			PreviewClips = new Dictionary<BMSSongInfo, AudioClip>();
 		UpdateText(SpeedText, "SPEED " + BMSGameManager.Speed.ToString("#.##"));
 		Scroll.value = ScrollValue;
+		Screen.SetResolution(1280, 720, true);
 	}
 	
 	// Update is called once per frame
 	void Update () {
+		if (Input.GetKeyDown(KeyCode.Escape)) Application.Quit();
+
 		ScrollValue = Scroll.value;
 		if (Input.GetKeyDown(KeyCode.DownArrow))
 		{
@@ -64,7 +69,8 @@ public class SelUIManager : MonoBehaviour {
 		}
 		else if (IsReady && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)))
 		{
-			UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+			Preview.Stop();
+			UnityEngine.SceneManagement.SceneManager.LoadScene(1);
 		}
 	}
 
@@ -114,7 +120,7 @@ public class SelUIManager : MonoBehaviour {
 						Preview.Play();
 				}
 
-				if (BMSFileSystem.SelectedHeader == null || BMSFileSystem.SelectedHeader.ParentPath.CompareTo(h.ParentPath) != 0)
+				if (BMSFileSystem.SelectedHeader == null || string.Compare(BMSFileSystem.SelectedHeader.ParentPath, h.ParentPath) != 0)
 					StartCoroutine(LoadBanner(h));
 				BMSFileSystem.SelectedHeader = h;
 				BMSFileSystem.SelectedPath = h.Path;
@@ -141,14 +147,15 @@ public class SelUIManager : MonoBehaviour {
 			yield break;
 		}
 
-		string path = $@"{h.ParentPath}\{WWW.EscapeURL(h.BannerPath).Replace('+', ' ')}";
-		WWW www = new WWW(path);
+		string path = $@"file:\\{h.ParentPath}\{h.BannerPath}";
+		UnityWebRequest www = UnityWebRequestTexture.GetTexture(path);
+		yield return www.SendWebRequest();
 		Texture t = null;
-		if (path.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase)) t = www.texture;
+		if (path.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase)) t = DownloadHandlerTexture.GetContent(www);
 		else if (path.EndsWith(".bmp", System.StringComparison.OrdinalIgnoreCase))
 		{
 			B83.Image.BMP.BMPLoader loader = new B83.Image.BMP.BMPLoader();
-			B83.Image.BMP.BMPImage img = loader.LoadBMP(www.bytes);
+			B83.Image.BMP.BMPImage img = loader.LoadBMP(www.downloadHandler.data);
 			t = img.ToTexture2D();
 		}
 
@@ -158,6 +165,5 @@ public class SelUIManager : MonoBehaviour {
 			Banner.texture = t;
 			Banner.rectTransform.sizeDelta = new Vector2(300, 80);
 		}
-		yield return www;
 	}
 }

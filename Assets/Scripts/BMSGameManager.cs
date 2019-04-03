@@ -36,6 +36,7 @@ public class BMSGameManager : MonoBehaviour
 	[SerializeField]
 	private int HitCount = 0;
 
+	private BMSHeader Header;
 	private BMSResult Res;
 	private JudgeManager Judge;
 	private BMSPattern Pat;
@@ -64,21 +65,26 @@ public class BMSGameManager : MonoBehaviour
 			{
 				if (!Pat.BGAChanges[i].IsPic)
 				{
-					Video.url = "file://" + BMSFileSystem.SelectedHeader.ParentPath + "/" + Pat.BGVideoTable[Pat.BGAChanges[i].Key];
+					Video.url = "file://" + Header.ParentPath + "/" + Pat.BGVideoTable[Pat.BGAChanges[i].Key];
 					break;
 				}
 			}
 
-			Video.Prepare();
-			yield return new WaitUntil(() => Video.isPrepared);
-			Debug.Log("Video Prepared");
+			if (!string.IsNullOrEmpty(Video.url))
+			{
+				Video.Prepare();
+				yield return new WaitUntil(() => Video.isPrepared);
+				Debug.Log("Video Prepared");
+			}
 
 			Video.gameObject.GetComponent<UnityEngine.UI.RawImage>().texture = Video.texture;
 			//Debug.Log(Video.clip.height + "/" + Video.clip.width);
-			Video.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(600, Video.clip.height / Video.clip.width * 600);
+			Video.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(600, 600);
 		}
 
 		yield return new WaitUntil(() => Sm.IsPrepared);
+		BMSFileSystem.SelectedHeader = null;
+		BMSFileSystem.SelectedPath = null;
 		IsPaused = false;
 	}
 
@@ -101,7 +107,7 @@ public class BMSGameManager : MonoBehaviour
 		Keys[7] = KeyCode.K;
 		Keys[8] = KeyCode.L;
 		Judge = JudgeManager.instance;
-
+		Header = BMSFileSystem.SelectedHeader;
 		StartCoroutine(PreLoad());
 	}
 
@@ -396,7 +402,7 @@ public class BMSGameManager : MonoBehaviour
 			AccuracySum += 1;
 			Res.Score += 2;
 			++Res.Pgr;
-			Hp += (float)BMSFileSystem.SelectedHeader.Total / 100 / Pat.NoteCount;
+			Hp += (float)Header.Total / 100 / Pat.NoteCount;
 			if (Hp > 1) Hp = 1;
 		}
 		else if (judge == JudgeType.GREAT)
@@ -404,14 +410,14 @@ public class BMSGameManager : MonoBehaviour
 			AccuracySum += 0.8;
 			Res.Score += 1;
 			++Res.Gr;
-			Hp += (float)BMSFileSystem.SelectedHeader.Total / 100 / Pat.NoteCount;
+			Hp += (float)Header.Total / 100 / Pat.NoteCount;
 			if (Hp > 1) Hp = 1;
 		}
 		else if (judge == JudgeType.GOOD)
 		{
 			AccuracySum += 0.5;
 			++Res.Good;
-			Hp += (float)BMSFileSystem.SelectedHeader.Total / 200 / Pat.NoteCount;
+			Hp += (float)Header.Total / 200 / Pat.NoteCount;
 			if (Hp > 1) Hp = 1;
 		}
 		else if (judge == JudgeType.BAD)

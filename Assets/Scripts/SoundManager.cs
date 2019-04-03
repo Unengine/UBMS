@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public class SoundManager : MonoBehaviour {
 
@@ -36,8 +37,9 @@ public class SoundManager : MonoBehaviour {
 		foreach (KeyValuePair<int, string> p in Pathes)
 		{
 			string url = BMSFileSystem.SelectedHeader.ParentPath + @"\";
-			WWW www = null;
+			UnityWebRequest www = null;
 			extensionFailCount = 0;
+			AudioType type = AudioType.OGGVORBIS;
 			do
 			{
 				if (File.Exists(url + p.Value + SoundExtensions[extensionFailCount])) break;
@@ -46,11 +48,16 @@ public class SoundManager : MonoBehaviour {
 			}
 			while (extensionFailCount < SoundExtensions.Length - 1);
 
-			www = new WWW("file://" + url + WWW.EscapeURL(p.Value + SoundExtensions[extensionFailCount]).Replace('+', ' '));
-			if (www.bytes.Length != 0)
+			if (string.Compare(SoundExtensions[extensionFailCount], ".wav", true) == 0) type = AudioType.WAV;
+			else if (string.Compare(SoundExtensions[extensionFailCount], ".mp3", true) == 0) type = AudioType.MPEG;
+
+			www = UnityWebRequestMultimedia.GetAudioClip(
+				"file://" + url + UnityWebRequest.EscapeURL(p.Value + SoundExtensions[extensionFailCount]).Replace('+', ' '), type);
+			yield return www.SendWebRequest();
+
+			if (www.downloadHandler.data.Length != 0)
 			{
-				yield return www;
-				AudioClip c = www.GetAudioClip(false);
+				AudioClip c = DownloadHandlerAudioClip.GetContent(www);
 				c.LoadAudioData();
 				Clips.Add(p.Key, c);
 			}

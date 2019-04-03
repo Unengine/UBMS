@@ -4,6 +4,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using B83.Image.BMP;
+using UnityEngine.Networking;
 
 public class GameUIManager : MonoBehaviour
 {
@@ -47,20 +48,24 @@ public class GameUIManager : MonoBehaviour
 		foreach (KeyValuePair<string, string> p in BGImageTable)
 		{
 			string path = "file://" + BMSFileSystem.SelectedHeader.ParentPath + "/" + p.Value;
-			WWW www = new WWW(path);
 
-			yield return www;
 
 			Texture2D t = null;
-			if (www.url.EndsWith(".bmp", System.StringComparison.OrdinalIgnoreCase))
+			if (path.EndsWith(".bmp", System.StringComparison.OrdinalIgnoreCase))
 			{
+				UnityWebRequest www = UnityWebRequest.Get(path);
+				yield return www.SendWebRequest();
+
 				BMPLoader loader = new BMPLoader();
-				BMPImage img = loader.LoadBMP(www.bytes);
+				BMPImage img = loader.LoadBMP(www.downloadHandler.data);
 				t = img.ToTexture2D();
 			}
-			else if (www.url.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase))
+			else if (path.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase))
 			{
-				t = www.texture;
+				UnityWebRequest www = UnityWebRequestTexture.GetTexture(path);
+				yield return www.SendWebRequest();
+
+				t = (www.downloadHandler as DownloadHandlerTexture).texture;
 			}
 
 			BGSprites.Add(p.Key, t);
