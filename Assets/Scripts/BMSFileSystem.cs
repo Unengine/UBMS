@@ -25,7 +25,7 @@ public class BMSFileSystem : MonoBehaviour {
 #if UNITY_EDITOR
 			RootPath = @"D:\BMSFiles\";
 #else
-
+			RootPath = $@"{Application.dataPath}\BMSFiles";
 #endif
 			Directories = Directory.GetDirectories(RootPath);
 			Songinfos = new BMSSongInfo[Directories.Length];
@@ -132,30 +132,31 @@ public class BMSFileSystem : MonoBehaviour {
 	public IEnumerator CLoadPreview(BMSSongInfo info, BMSHeader header, Dictionary<BMSSongInfo, AudioClip> dic)
 	{
 		string[] SoundExtensions = { ".ogg", ".wav", ".mp3" };
-		string url = $"file://{header.ParentPath}/{header.PreviewPath}";
+		string url = $@"{header.ParentPath}\{header.PreviewPath}";
 		WWW www = null;
 		int extensionFailCount = 0;
 		do
 		{
-			www = new WWW(url + WWW.EscapeURL(SoundExtensions[extensionFailCount]).Replace('+', ' '));
-			//Debug.Log(www.url);
-			if (www.bytes.Length != 0)
-			{
-				yield return www;
-				if (UI.PreviewClips.ContainsKey(info)) break;
-				AudioClip c = www.GetAudioClip(false);
-				c.LoadAudioData();
-				dic.Add(info, c);
-				break;
-			}
-			if (extensionFailCount >= SoundExtensions.Length - 1)
-			{
-				Debug.LogWarning($"Failed to read sound data : {www.url}");
-				break;
-			}
+			if (File.Exists(url + SoundExtensions[extensionFailCount])) break;
 			url.Replace(SoundExtensions[extensionFailCount], SoundExtensions[extensionFailCount + 1]);
 			++extensionFailCount;
 		}
-		while (www.bytes.Length == 0);
+		while (extensionFailCount < SoundExtensions.Length - 1);
+		//clips.Add(Resources.Load<AudioClip>(path + s));
+
+		www = new WWW("file://" + url + WWW.EscapeURL(SoundExtensions[extensionFailCount]).Replace('+', ' '));
+		if (www.bytes.Length != 0)
+		{
+			yield return www;
+			AudioClip c = www.GetAudioClip(false);
+			c.LoadAudioData();
+
+			if (!UI.PreviewClips.ContainsKey(info))
+				UI.PreviewClips.Add(info, c);
+		}
+		else
+		{
+			Debug.LogWarning($"Failed to read sound data : {www.url}");
+		}
 	}
 }

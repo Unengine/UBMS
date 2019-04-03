@@ -35,31 +35,29 @@ public class SoundManager : MonoBehaviour {
 		int extensionFailCount;
 		foreach (KeyValuePair<int, string> p in Pathes)
 		{
-			string url = "file://" + BMSFileSystem.SelectedHeader.ParentPath + @"\";
+			string url = BMSFileSystem.SelectedHeader.ParentPath + @"\";
 			WWW www = null;
 			extensionFailCount = 0;
 			do
 			{
-				www = new WWW(url + WWW.EscapeURL(p.Value + SoundExtensions[extensionFailCount]).Replace('+', ' '));
-				//Debug.Log(www.url);
-				if (www.bytes.Length != 0)
-				{
-					yield return www;
-					AudioClip c = www.GetAudioClip(false);
-					c.LoadAudioData();
-					Clips.Add(p.Key, c);
-					break;
-				}
-				if (extensionFailCount >= SoundExtensions.Length - 1)
-				{
-					Debug.LogWarning($"Failed to read sound data : {www.url}");
-					break;
-				}
+				if (File.Exists(url + p.Value + SoundExtensions[extensionFailCount])) break;
 				url.Replace(SoundExtensions[extensionFailCount], SoundExtensions[extensionFailCount + 1]);
 				++extensionFailCount;
 			}
-			while (www.bytes.Length == 0);
-			//clips.Add(Resources.Load<AudioClip>(path + s));
+			while (extensionFailCount < SoundExtensions.Length - 1);
+
+			www = new WWW("file://" + url + WWW.EscapeURL(p.Value + SoundExtensions[extensionFailCount]).Replace('+', ' '));
+			if (www.bytes.Length != 0)
+			{
+				yield return www;
+				AudioClip c = www.GetAudioClip(false);
+				c.LoadAudioData();
+				Clips.Add(p.Key, c);
+			}
+			else
+			{
+				Debug.LogWarning($"Failed to read sound data : {www.url}");
+			}
 		}
 
 		IsPrepared = true;

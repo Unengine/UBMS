@@ -1,3 +1,0 @@
-oggdec *.ogg
-
-EXIT
