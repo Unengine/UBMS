@@ -13,6 +13,8 @@ public class SelUIManager : MonoBehaviour {
 	public Scrollbar Scroll;
 
 	[SerializeField]
+	private Toggle ScrToggle;
+	[SerializeField]
 	private Text RecordText;
 	[SerializeField]
 	private Text SpeedText;
@@ -47,6 +49,7 @@ public class SelUIManager : MonoBehaviour {
 		UpdateText(SpeedText, "SPEED " + BMSGameManager.Speed.ToString("#.##"));
 		Scroll.value = ScrollValue;
 		Screen.SetResolution(1280, 720, true);
+		ScrToggle.isOn = BMSGameManager.IsAutoScr;
 	}
 	
 	// Update is called once per frame
@@ -193,6 +196,7 @@ public class SelUIManager : MonoBehaviour {
 		}
 		else
 			RecordText.text = "No Record!";
-
 	}
+
+	public void ToggleAutoScr() => BMSGameManager.IsAutoScr = ScrToggle.isOn;
 }

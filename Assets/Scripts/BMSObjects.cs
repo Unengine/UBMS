@@ -99,6 +99,7 @@ public class Stop : BMSObject
 
 public class BMSResult
 {
+	public int NoteCount { get; set; }
 	public int Pgr { get; set; }
 	public int Gr { get; set; }
 	public int Good { get; set; }

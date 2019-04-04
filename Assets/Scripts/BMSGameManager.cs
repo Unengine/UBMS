@@ -10,6 +10,7 @@ public class BMSGameManager : MonoBehaviour
 	public static float Speed = 3f;
 	public static bool IsPaused;
 	public static bool WillSaveData = true;
+	public static bool IsAutoScr = true;
 	public bool IsAuto = false;
 	public double Scroll;
 
@@ -59,6 +60,7 @@ public class BMSGameManager : MonoBehaviour
 		Sm.AddAudioClips();
 		UI.LoadImages();
 		Pat.GetBeatsAndTimings();
+		Res.NoteCount = Pat.NoteCount;
 		Drawer.DrawNotes();
 		CurrentBPM = Pat.Bpms.Peek.Bpm;
 		Pat.Bpms.RemoveLast();
@@ -85,7 +87,6 @@ public class BMSGameManager : MonoBehaviour
 				IsBgaVideoSupported = !errorFlag;
 			}
 		}
-
 		yield return new WaitUntil(() => UI.IsPrepared);
 		yield return new WaitUntil(() => Sm.IsPrepared);
 		Debug.Log("Game starts in 2 sec");
@@ -145,7 +146,7 @@ public class BMSGameManager : MonoBehaviour
 			}
 			else KeyPresses[i].speed = 1;
 
-			if (IsPaused) continue;
+			if (IsPaused || (IsAutoScr && i == 5)) continue;
 			Note n = (Pat.Lines[i].NoteList.Count > 0) ? Pat.Lines[i].NoteList.Peek : null;
 			if (Input.GetKeyDown(Keys[i]))
 			{
@@ -304,7 +305,7 @@ public class BMSGameManager : MonoBehaviour
 
 	}
 
-	private void HandleNote(Line l, int idx, float volume = 1.0f)
+	private void HandleNote(Line l, int idx, float volume = 1.0f, bool IsScoreAdded = true)
 	{
 		if (l.NoteList.Count <= 0) return;
 		++HitCount;
@@ -312,6 +313,7 @@ public class BMSGameManager : MonoBehaviour
 		n.Model.SetActive(false);
 		l.NoteList.RemoveLast();
 
+		if (!IsScoreAdded) return;
 
 		JudgeType result = Judge.Judge(n, CurrentTime);
 		if (n.Extra == 1 && result == JudgeType.IGNORE)
@@ -336,7 +338,8 @@ public class BMSGameManager : MonoBehaviour
 			Explodes[idx].Play("KeyExplode");
 		}
 
-		UpdateScore(result);
+		if (IsScoreAdded)
+			UpdateScore(result);
 		if (result != JudgeType.POOR)
 			UI.UpdateFSText((float)(n.Timing - CurrentTime) * 1000);
 	}
@@ -400,13 +403,14 @@ public class BMSGameManager : MonoBehaviour
 			}
 		}
 
-		while (Pat.Lines[5].NoteList.Count > 0 && Pat.Lines[5].NoteList.Peek.Timing <= CurrentTime)
-		{
-			KeyPresses[5].Rebind();
-			KeyPresses[5].Play("Press");
-			Sm.PlayKeySound(Pat.Lines[5].NoteList.Peek.KeySound);
-			HandleNote(Pat.Lines[5], 5);
-		}
+		if (IsAutoScr)
+			while (Pat.Lines[5].NoteList.Count > 0 && Pat.Lines[5].NoteList.Peek.Timing <= CurrentTime)
+			{
+				KeyPresses[5].Rebind();
+				KeyPresses[5].Play("Press");
+				Sm.PlayKeySound(Pat.Lines[5].NoteList.Peek.KeySound);
+				HandleNote(Pat.Lines[5], 5, 1, false);
+			}
 
 
 	}
@@ -449,6 +453,12 @@ public class BMSGameManager : MonoBehaviour
 			if (Hp < 0) Hp = 0;
 		}
 
+		if (Hp <= 0)
+		{
+			UnityEngine.SceneManagement.SceneManager.LoadScene(2);
+			Res.Accuracy = AccuracySum / Pat.NoteCount;
+			return;
+		}
 		UI.UpdateScore(Res, Hp, Res.Accuracy = AccuracySum / HitCount);
 	}
 

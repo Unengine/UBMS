@@ -20,18 +20,17 @@ public class ResultUIManager : MonoBehaviour
 	private void DrawResults()
 	{
 		Statistics.text =
+			$"NOTECOUNT : {BMSGameManager.Res.NoteCount.ToString("D4")}\n" +
 			$"PGREAT : {BMSGameManager.Res.Pgr.ToString("D4")}\n" +
 			$"GREAT : {BMSGameManager.Res.Gr.ToString("D4")}\n" +
 			$"GOOD : {BMSGameManager.Res.Good.ToString("D4")}\n" +
 			$"BAD : {BMSGameManager.Res.Bad.ToString("D4")}\n" +
 			$"POOR : {BMSGameManager.Res.Poor.ToString("D4")}\n\n" +
 			$"SCORE : {BMSGameManager.Res.Score.ToString("D4")}\n" +
-			$"ACCAURACY : {BMSGameManager.Res.Accuracy.ToString("P")}";
+			$"ACCURACY : {BMSGameManager.Res.Accuracy.ToString("P")}";
 
-		int tot = (BMSGameManager.Res.Pgr + BMSGameManager.Res.Gr + BMSGameManager.Res.Good +
-			BMSGameManager.Res.Bad + BMSGameManager.Res.Poor) * 2;
 
-		double ratio = BMSGameManager.Res.Score / (double)tot;
+		double ratio = BMSGameManager.Res.Score / (double)(BMSGameManager.Res.NoteCount * 2);
 
 		if (ratio >= 1) Rank.text = "WTF";
 		else if (ratio >= 0.9) Rank.text = "AAA";
@@ -54,7 +53,7 @@ public class ResultUIManager : MonoBehaviour
 				if ((int)prevResJson["Score"] > BMSGameManager.Res.Score) return;
 
 				else if ((int)prevResJson["Score"] == BMSGameManager.Res.Score)
-					if ((double)prevResJson["Accaurcy"] >= BMSGameManager.Res.Accuracy)
+					if ((double)prevResJson["Accuracy"] >= BMSGameManager.Res.Accuracy)
 						return;
 			}
 
