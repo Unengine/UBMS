@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using LitJson;
 
 public class ResultUIManager : MonoBehaviour
 {
@@ -24,7 +26,7 @@ public class ResultUIManager : MonoBehaviour
 			$"BAD : {BMSGameManager.Res.Bad.ToString("D4")}\n" +
 			$"POOR : {BMSGameManager.Res.Poor.ToString("D4")}\n\n" +
 			$"SCORE : {BMSGameManager.Res.Score.ToString("D4")}\n" +
-			$"ACCAURACY : {BMSGameManager.Res.Accaurcy.ToString("P")}";
+			$"ACCAURACY : {BMSGameManager.Res.Accuracy.ToString("P")}";
 
 		int tot = (BMSGameManager.Res.Pgr + BMSGameManager.Res.Gr + BMSGameManager.Res.Good +
 			BMSGameManager.Res.Bad + BMSGameManager.Res.Poor) * 2;
@@ -40,5 +42,24 @@ public class ResultUIManager : MonoBehaviour
 		else if (ratio >= 0.4) Rank.text = "D";
 		else if (ratio >= 0.3) Rank.text = "E";
 		else Rank.text = "F";
+
+		if(BMSGameManager.WillSaveData)
+		{
+			string path = $"{Application.dataPath}/{Path.GetFileName(BMSGameManager.Header.Path)}.Result.json";
+
+			if (File.Exists(path))
+			{
+				JsonData prevResJson = JsonMapper.ToObject(File.ReadAllText(path));
+
+				if ((int)prevResJson["Score"] > BMSGameManager.Res.Score) return;
+
+				else if ((int)prevResJson["Score"] == BMSGameManager.Res.Score)
+					if ((double)prevResJson["Accaurcy"] >= BMSGameManager.Res.Accuracy)
+						return;
+			}
+
+			JsonData resJson = JsonMapper.ToJson(BMSGameManager.Res);
+			File.WriteAllText(path, resJson.ToString());
+		}
 	}
 }

@@ -51,8 +51,8 @@ public class BMSParser : MonoBehaviour {
 
 	public void GetFile()
 	{
-		Header = BMSFileSystem.SelectedHeader;
-		BmsFile = System.IO.File.ReadAllLines(BMSFileSystem.SelectedPath);
+		Header = BMSGameManager.Header;
+		BmsFile = System.IO.File.ReadAllLines(BMSGameManager.Header.Path);
 	}
 
     private void ParseGameHeader()

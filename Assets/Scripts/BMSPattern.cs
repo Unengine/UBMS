@@ -72,7 +72,7 @@ public class BMSPattern
 		foreach (BPM b in Bpms) b.CalculateBeat(GetPreviousBarBeatSum(b.Bar), GetBeatC(b.Bar));
 		Bpms.Sort();
 		if (Bpms.Count == 0 || (Bpms.Count > 0 && Bpms[Bpms.Count - 1].Beat != 0))
-			AddBPM(0, 0, 1, BMSFileSystem.SelectedHeader.Bpm);
+			AddBPM(0, 0, 1, BMSGameManager.Header.Bpm);
 
 		Bpms[Bpms.Count - 1].Timing = 0;
 		for (int i = Bpms.Count - 2; i > -1; --i)

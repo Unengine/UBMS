@@ -105,7 +105,7 @@ public class BMSResult
 	public int Bad { get; set; }
 	public int Poor { get; set; }
 	public int Score { get; set; }
-	public double Accaurcy { get; set; }
+	public double Accuracy { get; set; }
 
 }
 

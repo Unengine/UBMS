@@ -1,16 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using LitJson;
 
 public class SelUIManager : MonoBehaviour {
 
 	public static float ScrollValue = 1;
 	public static Dictionary<BMSSongInfo, AudioClip> PreviewClips;
 	public Scrollbar Scroll;
-	public Text SpeedText;
 
+	[SerializeField]
+	private Text RecordText;
+	[SerializeField]
+	private Text SpeedText;
 	[SerializeField]
 	private GameObject ButtonPrefab;
 	[SerializeField]
@@ -122,6 +127,7 @@ public class SelUIManager : MonoBehaviour {
 
 				if (BMSFileSystem.SelectedHeader == null || string.Compare(BMSFileSystem.SelectedHeader.ParentPath, h.ParentPath) != 0)
 					StartCoroutine(LoadBanner(h));
+				UpdateRecordText(h);
 				BMSFileSystem.SelectedHeader = h;
 				BMSFileSystem.SelectedPath = h.Path;
 				UpdateText(SpeedText, "SPEED " + BMSGameManager.Speed.ToString("#.##") +
@@ -165,5 +171,28 @@ public class SelUIManager : MonoBehaviour {
 			Banner.texture = t;
 			Banner.rectTransform.sizeDelta = new Vector2(300, 80);
 		}
+	}
+
+	private void UpdateRecordText(BMSHeader header)
+	{
+		if (header == null) return;
+
+		string path = $"{Application.dataPath}/{Path.GetFileName(header.Path)}.Result.json";
+		if (File.Exists(path))
+		{
+			JsonData data = JsonMapper.ToObject(File.ReadAllText(path));
+
+			RecordText.text =
+				$"PGREAT : {((int)data["Pgr"]).ToString("D4")}\n" +
+				$"GREAT : {((int)data["Gr"]).ToString("D4")}\n" +
+				$"GOOD : {((int)data["Good"]).ToString("D4")}\n" +
+				$"BAD : {((int)data["Bad"]).ToString("D4")}\n" +
+				$"POOR : {((int)data["Poor"]).ToString("D4")}\n\n" +
+				$"SCORE : {((int)data["Score"]).ToString("D4")}\n" +
+				$"ACCAURACY : {((double)data["Accuracy"]).ToString("P")}";
+		}
+		else
+			RecordText.text = "No Record!";
+
 	}
 }

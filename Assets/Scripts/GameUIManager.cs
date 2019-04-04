@@ -38,13 +38,13 @@ public class GameUIManager : MonoBehaviour
 
 	public void LoadBackBmp()
 	{
-		if (!string.IsNullOrEmpty(BMSFileSystem.SelectedHeader.BackbmpPath))
+		if (!string.IsNullOrEmpty(BMSGameManager.Header.BackbmpPath))
 			StartCoroutine(CLoadBackBmp());
 	}
 
 	private IEnumerator CLoadBackBmp()
 	{
-		string path = "file://" + BMSFileSystem.SelectedHeader.ParentPath + "/" + BMSFileSystem.SelectedHeader.BackbmpPath;
+		string path = "file://" + BMSGameManager.Header.ParentPath + "/" + BMSGameManager.Header.BackbmpPath;
 
 		Texture2D t = null;
 		if (path.EndsWith(".bmp", System.StringComparison.OrdinalIgnoreCase))
@@ -89,7 +89,7 @@ public class GameUIManager : MonoBehaviour
 	{
 		foreach (KeyValuePair<string, string> p in BGImageTable)
 		{
-			string path = "file://" + BMSFileSystem.SelectedHeader.ParentPath + "/" + p.Value;
+			string path = "file://" + BMSGameManager.Header.ParentPath + "/" + p.Value;
 
 
 			Texture2D t = null;

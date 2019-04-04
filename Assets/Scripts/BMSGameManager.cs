@@ -9,6 +9,7 @@ public class BMSGameManager : MonoBehaviour
 	public static BMSResult Res;
 	public static float Speed = 3f;
 	public static bool IsPaused;
+	public static bool WillSaveData = true;
 	public bool IsAuto = false;
 	public double Scroll;
 
@@ -37,7 +38,7 @@ public class BMSGameManager : MonoBehaviour
 	[SerializeField]
 	private int HitCount = 0;
 
-	private BMSHeader Header;
+	public static BMSHeader Header;
 	private JudgeManager Judge;
 	private BMSPattern Pat;
 	private SoundManager Sm;
@@ -46,7 +47,7 @@ public class BMSGameManager : MonoBehaviour
 	private double CurrentBPM;
 	private float Hp = 1;
 	private int Combo = 0;
-	private bool IsBgaVideo = false;
+	private bool IsBgaVideoSupported = false;
 
 	private IEnumerator PreLoad()
 	{
@@ -76,10 +77,12 @@ public class BMSGameManager : MonoBehaviour
 
 			if (!string.IsNullOrEmpty(Video.url))
 			{
+				bool errorFlag = false;
+				Video.errorReceived += (a, b) => errorFlag = true;
 				Video.Prepare();
-				yield return new WaitUntil(() => Video.isPrepared);
+				yield return new WaitUntil(() => (Video.isPrepared || errorFlag));
 				Debug.Log("Video Prepared");
-				IsBgaVideo = true;
+				IsBgaVideoSupported = !errorFlag;
 			}
 		}
 
@@ -92,8 +95,6 @@ public class BMSGameManager : MonoBehaviour
 		UI.Bga.texture = Video.texture;
 		UI.Bga.color = Color.white;
 		UI.Bga.rectTransform.sizeDelta = new Vector2(600, 600);
-		BMSFileSystem.SelectedHeader = null;
-		BMSFileSystem.SelectedPath = null;
 		StartCoroutine(CheckIfSongEnded());
 		IsPaused = false;
 	}
@@ -119,6 +120,8 @@ public class BMSGameManager : MonoBehaviour
 		Keys[8] = KeyCode.L;
 		Judge = JudgeManager.instance;
 		Header = BMSFileSystem.SelectedHeader;
+		BMSFileSystem.SelectedHeader = null;
+		BMSFileSystem.SelectedPath = null;
 		UI.Bga.color = new Color(1, 1, 1, 0);
 		Wait2Sec = new WaitForSeconds(2.0f);
 		StartCoroutine(PreLoad());
@@ -169,7 +172,7 @@ public class BMSGameManager : MonoBehaviour
 		if (IsPaused) return;
 		while (Pat.BGAChanges.Count > 0 && Pat.BGAChanges.Peek.Timing - ((!Pat.BGAChanges.Peek.IsPic) ? 0.4 : 0) <= CurrentTime)
 		{
-			if (!Pat.BGAChanges.Peek.IsPic)
+			if (IsBgaVideoSupported && !Pat.BGAChanges.Peek.IsPic)
 			{
 				Video.Play();
 			}
@@ -446,17 +449,21 @@ public class BMSGameManager : MonoBehaviour
 			if (Hp < 0) Hp = 0;
 		}
 
-		UI.UpdateScore(Res, Hp, Res.Accaurcy = AccuracySum / HitCount);
+		UI.UpdateScore(Res, Hp, Res.Accuracy = AccuracySum / HitCount);
 	}
 
-	public void ToggleAuto() => IsAuto = !IsAuto;
+	public void ToggleAuto()
+	{
+		WillSaveData = false;
+		IsAuto = !IsAuto;
+	}
 
 	public IEnumerator CheckIfSongEnded()
 	{
 		while(true)
 		{
 			if (HitCount == Pat.NoteCount &&
-				((!IsBgaVideo && Pat.BGAChanges.Count == 0) || (IsBgaVideo && !Video.isPlaying)))
+				((!IsBgaVideoSupported && Pat.BGAChanges.Count == 0) || (IsBgaVideoSupported && !Video.isPlaying)))
 			{
 				UI.ComboUpTxt("Game Set!");
 				yield return Wait2Sec;

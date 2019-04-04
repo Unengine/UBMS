@@ -36,7 +36,7 @@ public class SoundManager : MonoBehaviour {
 		int extensionFailCount;
 		foreach (KeyValuePair<int, string> p in Pathes)
 		{
-			string url = BMSFileSystem.SelectedHeader.ParentPath + @"\";
+			string url = BMSGameManager.Header.ParentPath + @"\";
 			UnityWebRequest www = null;
 			extensionFailCount = 0;
 			AudioType type = AudioType.OGGVORBIS;
