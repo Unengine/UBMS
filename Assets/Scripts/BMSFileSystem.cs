@@ -25,6 +25,8 @@ public class BMSFileSystem : MonoBehaviour {
 		{
 #if UNITY_EDITOR
 			RootPath = @"D:\BMSFiles\";
+#elif DEVELOPMENT_BUILD
+			RootPath = @"D:\BMSFiles\";
 #else
 			RootPath = $@"{Directory.GetParent(Application.dataPath)}\BMSFiles";
 #endif

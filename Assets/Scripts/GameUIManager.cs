@@ -45,7 +45,6 @@ public class GameUIManager : MonoBehaviour
 	private IEnumerator CLoadBackBmp()
 	{
 		string path = "file://" + BMSFileSystem.SelectedHeader.ParentPath + "/" + BMSFileSystem.SelectedHeader.BackbmpPath;
-		Debug.Log(path);
 
 		Texture2D t = null;
 		if (path.EndsWith(".bmp", System.StringComparison.OrdinalIgnoreCase))
@@ -72,7 +71,6 @@ public class GameUIManager : MonoBehaviour
 		{
 			if (timer < 0.4f)
 			{
-				Debug.Log("timer : " + timer);
 				timer += Time.deltaTime;
 				Bga.color = new Color(1, 1, 1, timer * 2.5f);
 				return false;

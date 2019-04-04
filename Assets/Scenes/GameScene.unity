@@ -1286,7 +1286,7 @@ MonoBehaviour:
   IsAuto: 0
   Scroll: 0
   Drawer: {fileID: 490031823}
-  GameUI: {fileID: 1551605157}
+  UI: {fileID: 1551605157}
   NoteParent: {fileID: 86760153}
   Video: {fileID: 2114437048}
   KeyPresses:
@@ -2308,14 +2308,14 @@ RectTransform:
   m_GameObject: {fileID: 902760893}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.1, y: 0.1, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1551605153}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -137.8, y: -52.18}
+  m_AnchoredPosition: {x: -205, y: -52.18}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &902760895
@@ -2340,7 +2340,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: 0d84b8f1e3850d743ab601ee2e3b8c4f, type: 3}
-    m_FontSize: 150
+    m_FontSize: 15
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0
@@ -2524,14 +2524,14 @@ RectTransform:
   m_GameObject: {fileID: 996114837}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.1, y: 0.1, z: 0.9997714}
+  m_LocalScale: {x: 1, y: 1, z: 0.9997714}
   m_Children: []
   m_Father: {fileID: 1551605153}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.4984375, y: 0.45277777}
   m_AnchorMax: {x: 0.4984375, y: 0.45277777}
-  m_AnchoredPosition: {x: -605.2, y: -211.2}
+  m_AnchoredPosition: {x: -530, y: -182}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 1.6}
 --- !u!114 &996114839
@@ -2556,7 +2556,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: 8b0bd9cb17c72df48a7abe7ff59b7c47, type: 3}
-    m_FontSize: 250
+    m_FontSize: 25
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0
@@ -3047,9 +3047,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: '
-
-'
+  m_Text: 
 --- !u!222 &1234902352
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3767,7 +3765,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -442.03, y: -206.1}
+  m_AnchoredPosition: {x: -442.03, y: -206}
   m_SizeDelta: {x: 360, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1571777786

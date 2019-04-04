@@ -6,15 +6,16 @@ using UnityEngine.Video;
 
 public class BMSGameManager : MonoBehaviour
 {
-	public bool IsAuto = false;
-	public double Scroll;
+	public static BMSResult Res;
 	public static float Speed = 3f;
 	public static bool IsPaused;
+	public bool IsAuto = false;
+	public double Scroll;
 
 	[SerializeField]
 	private BMSDrawer Drawer;
 	[SerializeField]
-	private GameUIManager GameUI;
+	private GameUIManager UI;
 	[SerializeField]
 	private Transform NoteParent;
 	[SerializeField]
@@ -37,29 +38,30 @@ public class BMSGameManager : MonoBehaviour
 	private int HitCount = 0;
 
 	private BMSHeader Header;
-	private BMSResult Res;
 	private JudgeManager Judge;
 	private BMSPattern Pat;
 	private SoundManager Sm;
+	private WaitForSeconds Wait2Sec;
 	private KeyCode[] Keys;
 	private double CurrentBPM;
 	private float Hp = 1;
 	private int Combo = 0;
+	private bool IsBgaVideo = false;
 
 	private IEnumerator PreLoad()
 	{
 		BMSParser.Instance.Parse();
 		Pat = BMSParser.Instance.Pat;
-		GameUI.ComboUpTxt("Loading...");
-		GameUI.LoadBackBmp();
-		GameUI.Bga.rectTransform.sizeDelta = new Vector2(298, 349);
+		UI.ComboUpTxt("Loading...");
+		UI.LoadBackBmp();
+		UI.Bga.rectTransform.sizeDelta = new Vector2(298, 349);
 		Sm.AddAudioClips();
-		GameUI.LoadImages();
+		UI.LoadImages();
 		Pat.GetBeatsAndTimings();
 		Drawer.DrawNotes();
 		CurrentBPM = Pat.Bpms.Peek.Bpm;
 		Pat.Bpms.RemoveLast();
-		GameUI.UpdateBPMText(CurrentBPM);
+		UI.UpdateBPMText(CurrentBPM);
 
 		if (Video.isActiveAndEnabled)
 		{
@@ -77,20 +79,22 @@ public class BMSGameManager : MonoBehaviour
 				Video.Prepare();
 				yield return new WaitUntil(() => Video.isPrepared);
 				Debug.Log("Video Prepared");
+				IsBgaVideo = true;
 			}
 		}
 
-		yield return new WaitUntil(() => GameUI.IsPrepared);
+		yield return new WaitUntil(() => UI.IsPrepared);
 		yield return new WaitUntil(() => Sm.IsPrepared);
 		Debug.Log("Game starts in 2 sec");
-		GameUI.ComboUpTxt("Game Start!");
-		yield return new WaitForSeconds(2);
-		GameUI.UpdateComboText(string.Empty);
-		GameUI.Bga.texture = Video.texture;
-		GameUI.Bga.color = Color.white;
-		GameUI.Bga.rectTransform.sizeDelta = new Vector2(600, 600);
+		UI.ComboUpTxt("Game Start!");
+		yield return Wait2Sec;
+		UI.UpdateComboText(string.Empty);
+		UI.Bga.texture = Video.texture;
+		UI.Bga.color = Color.white;
+		UI.Bga.rectTransform.sizeDelta = new Vector2(600, 600);
 		BMSFileSystem.SelectedHeader = null;
 		BMSFileSystem.SelectedPath = null;
+		StartCoroutine(CheckIfSongEnded());
 		IsPaused = false;
 	}
 
@@ -115,7 +119,8 @@ public class BMSGameManager : MonoBehaviour
 		Keys[8] = KeyCode.L;
 		Judge = JudgeManager.instance;
 		Header = BMSFileSystem.SelectedHeader;
-		GameUI.Bga.color = new Color(1, 1, 1, 0);
+		UI.Bga.color = new Color(1, 1, 1, 0);
+		Wait2Sec = new WaitForSeconds(2.0f);
 		StartCoroutine(PreLoad());
 	}
 
@@ -170,7 +175,7 @@ public class BMSGameManager : MonoBehaviour
 			}
 			else
 			{
-				GameUI.ChangeBGA(Pat.BGAChanges.Peek.Key);
+				UI.ChangeBGA(Pat.BGAChanges.Peek.Key);
 			}
 			Pat.BGAChanges.RemoveLast();
 		}
@@ -227,7 +232,7 @@ public class BMSGameManager : MonoBehaviour
 				double diff = next.Timing - prevTime;
 				avg += CurrentBPM * diff;
 				CurrentBPM = (next as BPM).Bpm;
-				GameUI.UpdateBPMText(CurrentBPM);
+				UI.UpdateBPMText(CurrentBPM);
 				prevTime = next.Timing;
 				Pat.Bpms.RemoveLast();
 			}
@@ -290,7 +295,7 @@ public class BMSGameManager : MonoBehaviour
 		if (n.Extra == -1 && Judge.Judge(n, CurrentTime) == JudgeType.PGREAT)
 		{
 			Debug.Log("bomb");
-			GameUI.ComboUpTxt("LANDMINE!");
+			UI.ComboUpTxt("LANDMINE!");
 			n.Extra = -2;
 		}
 
@@ -314,12 +319,12 @@ public class BMSGameManager : MonoBehaviour
 		}
 		if (result > JudgeType.BAD)
 		{
-			GameUI.ComboUpTxt(result, ++Combo);
+			UI.ComboUpTxt(result, ++Combo);
 		}
 		else
 		{
 			Combo = 0;
-			GameUI.ComboUpTxt(result.ToString());
+			UI.ComboUpTxt(result.ToString());
 		}
 
 		if (Combo > 0)
@@ -330,7 +335,7 @@ public class BMSGameManager : MonoBehaviour
 
 		UpdateScore(result);
 		if (result != JudgeType.POOR)
-			GameUI.UpdateFSText((float)(n.Timing - CurrentTime) * 1000);
+			UI.UpdateFSText((float)(n.Timing - CurrentTime) * 1000);
 	}
 
 	private void PlayNotes()
@@ -441,8 +446,25 @@ public class BMSGameManager : MonoBehaviour
 			if (Hp < 0) Hp = 0;
 		}
 
-		GameUI.UpdateScore(Res, Hp, Res.Accaurcy = AccuracySum / HitCount);
+		UI.UpdateScore(Res, Hp, Res.Accaurcy = AccuracySum / HitCount);
 	}
 
 	public void ToggleAuto() => IsAuto = !IsAuto;
+
+	public IEnumerator CheckIfSongEnded()
+	{
+		while(true)
+		{
+			if (HitCount == Pat.NoteCount &&
+				((!IsBgaVideo && Pat.BGAChanges.Count == 0) || (IsBgaVideo && !Video.isPlaying)))
+			{
+				UI.ComboUpTxt("Game Set!");
+				yield return Wait2Sec;
+				UnityEngine.SceneManagement.SceneManager.LoadScene(2);
+				break;
+			}
+
+			yield return Wait2Sec;
+		}
+	}
 }
