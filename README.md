@@ -2,6 +2,8 @@
 
 Unity BMS player. Supports modern bmses.
 
+[Download currently executable binary](https://drive.google.com/open?id=1-lwr0RRVI6wYmisHqZzlVLvPNVDXqsPC)
+
 
 ## What is BMS?
 A format for rhythm games similiar to [Beatmania IIDX](https://en.wikipedia.org/wiki/Beatmania_IIDX). (Acutally is almost the same!)

@@ -27,6 +27,8 @@ public class BMSHeader : IComparable<BMSHeader>
 	public int Lnobj { get; set; }
 	public int Level { get; set; }
     public int Player { get; set; }
+	public string StagefilePath { get; set; }
+	public string PreviewPath { get; set; }
 	public string BackbmpPath { get; set; }
 	public string BannerPath { get; set; }
 	public string BGImagePath { get; set; }
@@ -34,7 +36,6 @@ public class BMSHeader : IComparable<BMSHeader>
     public string Genre { get; set; }
     public string Title { get; set; }
 	public string Subtitle { get; set; }
-	public string PreviewPath { get; set; }
     public double Total { get; set; }
     public double Bpm { get; set; }
 
