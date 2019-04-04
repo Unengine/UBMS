@@ -16,7 +16,7 @@ BMS Data File : .bms, .bme, .bml
 
 BGA (Background Animation) : MP4, MPEG (partially not supported), bmp, png
 
-Audio Files : .ogg, .wav, .mp3 (not supported in Windows)
+Audio Files : .ogg, .wav, .mp3 (not supported on Windows)
 
 ## System Requirement
 
