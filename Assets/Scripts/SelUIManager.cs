@@ -38,6 +38,14 @@ public class SelUIManager : MonoBehaviour {
 	private GameObject InformText;
 	[SerializeField]
 	private AudioSource Preview;
+	[SerializeField]
+	private GameObject Panel;
+	[SerializeField]
+	private KeySettingManager KeySetting;
+	[SerializeField]
+	private Text[] KeyConfigTexts;
+	[SerializeField]
+	private GameObject KeySetPanel;
 
 	private GameObject[] PatternButtons;
 	private bool IsReady = false;
@@ -55,6 +63,8 @@ public class SelUIManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if (Input.GetKeyDown(KeyCode.Escape)) Application.Quit();
+
+		if (IsChanging) return;
 
 		ScrollValue = Scroll.value;
 		if (Input.GetKeyDown(KeyCode.DownArrow))
@@ -199,4 +209,140 @@ public class SelUIManager : MonoBehaviour {
 	}
 
 	public void ToggleAutoScr() => BMSGameManager.IsAutoScr = ScrToggle.isOn;
+
+	public void ToggleOption()
+	{
+		if (Panel.activeSelf)
+			KeySetting.SaveOptions();
+		else
+		{
+			KeySetPanel.SetActive(false);
+			for (int i = 0; i < KeyConfigTexts.Length; ++i)
+			{
+				KeyConfigTexts[i].text = ((KeyCode)KeySettingManager.Config.Keys[i]).ToString();
+			}
+		}
+
+		Panel.SetActive(!Panel.activeSelf);
+	}
+
+	private bool IsChanging = false;
+	public void ChangeKey(int idx)
+	{
+		//idx : SUp 0, SDown 1, Lane 2~8
+		if (!IsChanging)
+			StartCoroutine(WaitKeyChange(idx));
+	}
+
+	private IEnumerator WaitKeyChange(int idx)
+	{
+		IsChanging = true;
+		KeySetPanel.SetActive(true);
+		int key = KeySettingManager.Config.Keys[idx];
+		float timer = 0;
+		while (IsChanging)
+		{
+			if (Input.GetKeyDown(KeyCode.Escape)) IsChanging = false;
+
+			#region AvailableKeys
+			else if (Input.GetKeyDown(KeyCode.LeftShift))
+			{
+				key = (int)KeyCode.LeftShift;
+				IsChanging = false;
+			}
+			else if (Input.GetKeyDown(KeyCode.RightShift))
+			{
+				key = (int)KeyCode.RightShift;
+				IsChanging = false;
+			}
+			else if (Input.GetKeyDown(KeyCode.Tab))
+			{
+				key = (int)KeyCode.Tab;
+				IsChanging = false;
+			}
+			else if (Input.GetKeyDown(KeyCode.LeftAlt))
+			{
+				key = (int)KeyCode.LeftAlt;
+				IsChanging = false;
+			}
+			else if (Input.GetKeyDown(KeyCode.RightAlt))
+			{
+				key = (int)KeyCode.RightAlt;
+				IsChanging = false;
+			}
+			else if (Input.GetKeyDown(KeyCode.LeftControl))
+			{
+				key = (int)KeyCode.LeftControl;
+				IsChanging = false;
+			}
+			else if (Input.GetKeyDown(KeyCode.RightControl))
+			{
+				key = (int)KeyCode.LeftControl;
+				IsChanging = false;
+			}
+			else if (Input.GetKeyDown(KeyCode.Semicolon))
+			{
+				key = (int)KeyCode.Semicolon;
+				IsChanging = false;
+			}
+			else if (Input.GetKeyDown(KeyCode.LeftBracket))
+			{
+				key = (int)KeyCode.LeftBracket;
+				IsChanging = false;
+			}
+			else if (Input.GetKeyDown(KeyCode.RightBracket))
+			{
+				key = (int)KeyCode.RightBracket;
+				IsChanging = false;
+			}
+			else if (Input.GetKeyDown(KeyCode.Quote))
+			{
+				key = (int)KeyCode.Quote;
+				IsChanging = false;
+			}
+			else if (Input.GetKeyDown(KeyCode.Colon))
+			{
+				key = (int)KeyCode.Colon;
+				IsChanging = false;
+			}
+			else if (Input.GetKeyDown(KeyCode.Slash))
+			{
+				key = (int)KeyCode.Slash;
+				IsChanging = false;
+			}
+			else if (Input.GetKeyDown(KeyCode.Period))
+			{
+				key = (int)KeyCode.Period;
+				IsChanging = false;
+			}
+			else if (Input.GetKeyDown(KeyCode.Space))
+			{
+				key = (int)KeyCode.Space;
+				IsChanging = false;
+			}
+			else if (Input.inputString.Length > 0)
+			{
+				key = Input.inputString[0];
+
+				if ((key >= '0' && key <= '9') ||
+					(key >= 'a' && key <= 'z') ||
+					(key >= 'A' && key <= 'Z'))
+					IsChanging = false;
+			}
+			#endregion
+			timer += Time.deltaTime;
+			if (timer >= 10.0f)
+			{
+				IsChanging = false;
+			}
+			yield return null;
+		}
+
+		if (timer < 10.0f)
+		{
+			KeySettingManager.Config.Keys[idx] = key;
+			KeyConfigTexts[idx].text = ((KeyCode)KeySettingManager.Config.Keys[idx]).ToString();
+		}
+		KeySetPanel.SetActive(false);
+	}
 }

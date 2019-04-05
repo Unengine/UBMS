@@ -109,16 +109,17 @@ public class BMSGameManager : MonoBehaviour
 		Pat = BMSParser.Instance.Pat;
 		Sm = GetComponent<SoundManager>();
 		Res = new BMSResult();
-		Keys = new KeyCode[9];
-		Keys[0] = KeyCode.S;
-		Keys[1] = KeyCode.D;
-		Keys[2] = KeyCode.F;
-		Keys[3] = KeyCode.Space;
-		Keys[4] = KeyCode.J;
-		Keys[5] = KeyCode.LeftShift;
-		Keys[6] = KeyCode.Escape;
-		Keys[7] = KeyCode.K;
-		Keys[8] = KeyCode.L;
+		Keys = new KeyCode[10];
+		Keys[0] = (KeyCode)KeySettingManager.Config.Keys[2];
+		Keys[1] = (KeyCode)KeySettingManager.Config.Keys[3];
+		Keys[2] = (KeyCode)KeySettingManager.Config.Keys[4];
+		Keys[3] = (KeyCode)KeySettingManager.Config.Keys[5];
+		Keys[4] = (KeyCode)KeySettingManager.Config.Keys[6];
+		Keys[5] = (KeyCode)KeySettingManager.Config.Keys[0];	//sc up
+		Keys[6] = KeyCode.None;
+		Keys[7] = (KeyCode)KeySettingManager.Config.Keys[7];
+		Keys[8] = (KeyCode)KeySettingManager.Config.Keys[8];
+		Keys[9] = (KeyCode)KeySettingManager.Config.Keys[1];	//sc down
 		Judge = JudgeManager.instance;
 		Header = BMSFileSystem.SelectedHeader;
 		BMSFileSystem.SelectedHeader = null;
@@ -134,27 +135,28 @@ public class BMSGameManager : MonoBehaviour
 
 		for (int i = 0; i < Keys.Length; ++i)
 		{
+			int lineIdx = (i == 9) ? 5 : i;
 			if(Input.GetKeyDown(Keys[i]))
 			{
-				KeyPresses[i].Rebind();
-				KeyPresses[i].Play("Press");
+				KeyPresses[lineIdx].Rebind();
+				KeyPresses[lineIdx].Play("Press");
 			}
 
 			if (Input.GetKey(Keys[i]))
 			{
-				KeyPresses[i].speed = 0;
+				KeyPresses[lineIdx].speed = 0;
 			}
-			else KeyPresses[i].speed = 1;
+			else KeyPresses[lineIdx].speed = 1;
 
-			if (IsPaused || (IsAutoScr && i == 5)) continue;
-			Note n = (Pat.Lines[i].NoteList.Count > 0) ? Pat.Lines[i].NoteList.Peek : null;
+			if (IsPaused || (IsAutoScr && lineIdx == 5)) continue;
+			Note n = (Pat.Lines[lineIdx].NoteList.Count > 0) ? Pat.Lines[lineIdx].NoteList.Peek : null;
 			if (Input.GetKeyDown(Keys[i]))
 			{
 				if (n != null && n.Extra != 1)
 				{
 					Sm.PlayKeySound(n.KeySound);
 					if (Judge.Judge(n, CurrentTime) != JudgeType.IGNORE)
-						HandleNote(Pat.Lines[i], i);
+						HandleNote(Pat.Lines[lineIdx], lineIdx);
 				}
 			}
 			else if (Input.GetKeyUp(Keys[i]))
@@ -162,7 +164,7 @@ public class BMSGameManager : MonoBehaviour
 				if (n != null && n.Extra == 1)
 				{
 					Sm.PlayKeySound(n.KeySound);
-					HandleNote(Pat.Lines[i], i);
+					HandleNote(Pat.Lines[lineIdx], lineIdx);
 				}
 			}
 		}
@@ -382,10 +384,6 @@ public class BMSGameManager : MonoBehaviour
 			for (int i = 0; i < Pat.Lines.Length; ++i)
 			{
 				Line l = Pat.Lines[i];
-				if (Input.GetKey(Keys[i]) && l.LandMineList.Count > 0)
-				{
-					Damage(l);
-				}
 				while (l.NoteList.Count > 0 && Judge.Judge(l.NoteList.Peek, CurrentTime) == JudgeType.POOR)
 				{
 					Note n = l.NoteList.Peek;

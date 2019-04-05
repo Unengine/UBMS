@@ -22,6 +22,7 @@
 *png*
 *bmp*
 *Result*
+*KeyConfig*
 
 # Never ignore Asset meta data (no! sound.meta should be ignored)
 # ![Aa]ssets/**/*.meta
