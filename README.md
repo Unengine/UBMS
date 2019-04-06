@@ -7,7 +7,7 @@ Unity BMS player. Supports modern bmses.
 
 [Quicktime](https://support.apple.com/kb/DL837?locale=ko_KR) should be installed to play video bga.
 
-Thank you for sound piercer for providing [Main BGM](https://www.youtube.com/watch?v=EmcTqpdJ1gs)!
+Thanks to sound piercer for providing [Main BGM](https://www.youtube.com/watch?v=EmcTqpdJ1gs)!
 
 선곡창 BGM 제공해주신 sound piercer님 정말 감사합니다!
 
