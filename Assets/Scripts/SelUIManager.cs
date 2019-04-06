@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 using LitJson;
+using B83.Image.BMP;
 
 public class SelUIManager : MonoBehaviour {
 
@@ -37,17 +38,22 @@ public class SelUIManager : MonoBehaviour {
 	[SerializeField]
 	private GameObject InformText;
 	[SerializeField]
-	private AudioSource Preview;
-	[SerializeField]
-	private GameObject Panel;
+	private GameObject OptionPanel;
 	[SerializeField]
 	private KeySettingManager KeySetting;
 	[SerializeField]
 	private Text[] KeyConfigTexts;
 	[SerializeField]
 	private GameObject KeySetPanel;
+	[SerializeField]
+	private GameObject StageImg;
 
+	[SerializeField]
+	private AudioSource Preview;
+	[SerializeField]
+	private AudioSource MainBGM;
 	private GameObject[] PatternButtons;
+	private static float PrevBGMTime = 0;
 	private bool IsReady = false;
 
 	// Use this for initialization
@@ -58,6 +64,7 @@ public class SelUIManager : MonoBehaviour {
 		Scroll.value = ScrollValue;
 		Screen.SetResolution(1280, 720, true);
 		ScrToggle.isOn = BMSGameManager.IsAutoScr;
+		MainBGM.time = PrevBGMTime;
 	}
 	
 	// Update is called once per frame
@@ -85,11 +92,46 @@ public class SelUIManager : MonoBehaviour {
 				(BMSFileSystem.SelectedHeader != null ?
 				$" ({(BMSGameManager.Speed * BMSFileSystem.SelectedHeader.Bpm).ToString("0")})" : string.Empty));
 		}
-		else if (IsReady && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)))
+		else if (!OptionPanel.activeSelf && IsReady && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)))
 		{
-			Preview.Stop();
-			UnityEngine.SceneManagement.SceneManager.LoadScene(1);
+			StartCoroutine(GameStart());
 		}
+	}
+
+	public IEnumerator GameStart()
+	{
+		IsChanging = true;	//block all
+		Preview.Stop();
+		PrevBGMTime = MainBGM.time;
+		MainBGM.time = 125.8f;
+		string path = $"file://{BMSFileSystem.SelectedHeader.ParentPath}/{BMSFileSystem.SelectedHeader.StagefilePath}";
+		Debug.Log(path);
+		Texture2D t = null;
+		if (path.EndsWith(".bmp", System.StringComparison.OrdinalIgnoreCase))
+		{
+			UnityWebRequest www = UnityWebRequest.Get(path);
+			yield return www.SendWebRequest();
+			BMPLoader loader = new BMPLoader();
+			BMPImage img = loader.LoadBMP(www.downloadHandler.data);
+			t = img.ToTexture2D();
+		}
+		else if (path.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase))
+		{
+			UnityWebRequest www = UnityWebRequestTexture.GetTexture(path);
+			yield return www.SendWebRequest();
+			t = (www.downloadHandler as DownloadHandlerTexture).texture;
+		}
+		else if (path.EndsWith(".jpg", System.StringComparison.OrdinalIgnoreCase))
+		{
+			UnityWebRequest www = UnityWebRequestTexture.GetTexture(path);
+			yield return www.SendWebRequest();
+			t = (www.downloadHandler as DownloadHandlerTexture).texture;
+		}
+		StageImg.GetComponentInChildren<RawImage>().texture = t;
+		StageImg.GetComponentInChildren<Text>().text = BMSFileSystem.SelectedHeader.Title;
+		StageImg.SetActive(true);
+		yield return new WaitForSeconds(5f);
+		UnityEngine.SceneManagement.SceneManager.LoadScene(1);
 	}
 
 	public void UpdateText(Text text, string str) => text.text = str;
@@ -129,13 +171,20 @@ public class SelUIManager : MonoBehaviour {
 			t.GetComponentInChildren<Text>().text = h.Level + " - " + (!string.IsNullOrEmpty(h.Subtitle) ? h.Subtitle : h.Title);
 			t.GetComponent<Button>().onClick.AddListener(() =>
 			{
-				if (!PreviewClips.ContainsKey(songinfo) || Preview.clip != PreviewClips[songinfo])
+				if (!PreviewClips.ContainsKey(songinfo))
+				{
+					MainBGM.UnPause();
 					Preview.Stop();
+				}
 				if (PreviewClips.ContainsKey(songinfo))
 				{
+					if (Preview.clip != PreviewClips[songinfo]) Preview.Stop();
 					Preview.clip = PreviewClips[songinfo];
 					if (!Preview.isPlaying)
+					{
+						MainBGM.Pause();
 						Preview.Play();
+					}
 				}
 
 				if (BMSFileSystem.SelectedHeader == null || string.Compare(BMSFileSystem.SelectedHeader.ParentPath, h.ParentPath) != 0)
@@ -212,7 +261,7 @@ public class SelUIManager : MonoBehaviour {
 
 	public void ToggleOption()
 	{
-		if (Panel.activeSelf)
+		if (OptionPanel.activeSelf)
 			KeySetting.SaveOptions();
 		else
 		{
@@ -223,7 +272,7 @@ public class SelUIManager : MonoBehaviour {
 			}
 		}
 
-		Panel.SetActive(!Panel.activeSelf);
+		OptionPanel.SetActive(!OptionPanel.activeSelf);
 	}
 
 	private bool IsChanging = false;
@@ -322,7 +371,8 @@ public class SelUIManager : MonoBehaviour {
 			}
 			else if (Input.inputString.Length > 0)
 			{
-				key = Input.inputString[0];
+
+				key = char.ToLower(Input.inputString[0]);
 
 				if ((key >= '0' && key <= '9') ||
 					(key >= 'a' && key <= 'z') ||

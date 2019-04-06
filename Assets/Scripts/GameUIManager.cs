@@ -25,6 +25,8 @@ public class GameUIManager : MonoBehaviour
 	private Text FSText;
 	[SerializeField]
 	private Text ComboText;
+	[SerializeField]
+	private Image StartPanel;
 
 	private Animator ComboAnim;
 
@@ -107,6 +109,12 @@ public class GameUIManager : MonoBehaviour
 				UnityWebRequest www = UnityWebRequestTexture.GetTexture(path);
 				yield return www.SendWebRequest();
 
+				t = (www.downloadHandler as DownloadHandlerTexture).texture;
+			}
+			else if (path.EndsWith(".jpg", System.StringComparison.OrdinalIgnoreCase))
+			{
+				UnityWebRequest www = UnityWebRequestTexture.GetTexture(path);
+				yield return www.SendWebRequest();
 				t = (www.downloadHandler as DownloadHandlerTexture).texture;
 			}
 			BGSprites.Add(p.Key, t);

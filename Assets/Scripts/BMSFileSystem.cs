@@ -65,22 +65,22 @@ public class BMSFileSystem : MonoBehaviour {
 
 				try
 				{
-					if (s.Length > 10 && string.Compare(s.Substring(0, 10), "#PLAYLEVEL") == 0)
+					if (s.Length > 10 && string.Compare(s.Substring(0, 10), "#PLAYLEVEL", true) == 0)
 					{
 						int lvl = 0;
 						int.TryParse(s.Substring(11), out lvl);
 						header.Level = lvl;
 					}
-					else if (s.Length > 11 && string.Compare(s.Substring(0, 10), "#STAGEFILE") == 0) header.BGImagePath = s.Substring(11, s.Length - 15);
-					else if (s.Length >= 9 && string.Compare(s.Substring(0, 9), "#SUBTITLE") == 0) header.Subtitle = s.Substring(10).Trim('[', ']');
-					else if (s.Length >= 8 && string.Compare(s.Substring(0, 8), "#PREVIEW") == 0) header.PreviewPath = s.Substring(9, s.Length - 13);
-					else if (s.Length >= 8 && string.Compare(s.Substring(0, 8), "#BACKBMP") == 0) header.BackbmpPath = s.Substring(9);
-					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#PLAYER") == 0) header.Player = s[8] - '0';
-					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#ARTIST") == 0) header.Artist = s.Substring(8);
-					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#BANNER") == 0) header.BannerPath = s.Substring(8);
-					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#LNTYPE") == 0) header.LnType |= (Lntype)(1 << (s[8] - '0'));
-					else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#GENRE") == 0) header.Genre = s.Substring(7);
-					else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#TITLE") == 0)
+					else if (s.Length > 11 && string.Compare(s.Substring(0, 10), "#STAGEFILE", true) == 0) header.StagefilePath = s.Substring(11);
+					else if (s.Length >= 9 && string.Compare(s.Substring(0, 9), "#SUBTITLE", true) == 0) header.Subtitle = s.Substring(10).Trim('[', ']');
+					else if (s.Length >= 8 && string.Compare(s.Substring(0, 8), "#PREVIEW", true) == 0) header.PreviewPath = s.Substring(9, s.Length - 13);
+					else if (s.Length >= 8 && string.Compare(s.Substring(0, 8), "#BACKBMP", true) == 0) header.BackbmpPath = s.Substring(9);
+					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#PLAYER", true) == 0) header.Player = s[8] - '0';
+					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#ARTIST", true) == 0) header.Artist = s.Substring(8);
+					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#BANNER", true) == 0) header.BannerPath = s.Substring(8);
+					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#LNTYPE", true) == 0) header.LnType |= (Lntype)(1 << (s[8] - '0'));
+					else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#GENRE", true) == 0) header.Genre = s.Substring(7);
+					else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#TITLE", true) == 0)
 					{
 						header.Title = s.Substring(7);
 						if (!string.IsNullOrEmpty(header.Title))

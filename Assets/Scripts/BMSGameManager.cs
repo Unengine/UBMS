@@ -54,7 +54,7 @@ public class BMSGameManager : MonoBehaviour
 	{
 		BMSParser.Instance.Parse();
 		Pat = BMSParser.Instance.Pat;
-		UI.ComboUpTxt("Loading...");
+		UI.UpdateComboText("Loading...");
 		UI.LoadBackBmp();
 		UI.Bga.rectTransform.sizeDelta = new Vector2(298, 349);
 		Sm.AddAudioClips();
@@ -475,6 +475,8 @@ public class BMSGameManager : MonoBehaviour
 			{
 				UI.ComboUpTxt("Game Set!");
 				yield return Wait2Sec;
+				GameObject.Find("StartPanel").GetComponent<Animator>().Play("FadeInPanel");
+				yield return new WaitForSeconds(0.35f);
 				UnityEngine.SceneManagement.SceneManager.LoadScene(2);
 				break;
 			}

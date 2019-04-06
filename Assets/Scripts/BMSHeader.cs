@@ -31,7 +31,6 @@ public class BMSHeader : IComparable<BMSHeader>
 	public string PreviewPath { get; set; }
 	public string BackbmpPath { get; set; }
 	public string BannerPath { get; set; }
-	public string BGImagePath { get; set; }
     public string Artist { get; set; }
     public string Genre { get; set; }
     public string Title { get; set; }
