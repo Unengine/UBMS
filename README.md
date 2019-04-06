@@ -2,7 +2,10 @@
 
 Unity BMS player. Supports modern bmses.
 
+
 [Download currently executable binary](https://drive.google.com/open?id=1-lwr0RRVI6wYmisHqZzlVLvPNVDXqsPC)
+
+[Quicktime](https://support.apple.com/kb/DL837?locale=ko_KR) should be installed to play video bga.
 
 
 ## What is BMS?
@@ -21,6 +24,8 @@ Audio Files : .ogg, .wav, .mp3 (not supported on Windows)
 ## System Requirement
 
 Minimum : Windows 7 SP1, DirectX 10, SSE2 supporting CPU
+
+[Quicktime](https://support.apple.com/kb/DL837?locale=ko_KR) should be installed to play video bga.
 
 ## BMS Supports
 

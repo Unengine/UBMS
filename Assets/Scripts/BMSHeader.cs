@@ -36,7 +36,7 @@ public class BMSHeader : IComparable<BMSHeader>
     public string Genre { get; set; }
     public string Title { get; set; }
 	public string Subtitle { get; set; }
-    public double Total { get; set; }
+    public double Total { get; set; } = 400;
     public double Bpm { get; set; }
 
 	public int CompareTo(BMSHeader h)
