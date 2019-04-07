@@ -2816,7 +2816,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Welcome!
+  m_Text: Welcome to UBMS!
 --- !u!222 &927896091
 CanvasRenderer:
   m_ObjectHideFlags: 0
