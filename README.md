@@ -32,6 +32,8 @@ Minimum : Windows 7 SP1, DirectX 10, SSE2 supporting CPU
 
 ## BMS Supports
 
+Only SP available now (1P Side)
+
 Landmines (does not explode), Loading/Saving Records, Chaning Scroll Speed, Autoplay, Auto-Scratch, Directory System
 
 ### Supported Commands
@@ -48,3 +50,12 @@ CONTROL FLOWS
 CHANNELS
 
 01, 02, 03, 04, 08, 09, 11-19, 51-59, D1-D9, E1-E9 
+
+## TODO Priority
+
+· Judgeline adjusting
+
+· 2P/DP Play
+
+· Gauges (Groove, Hard Survival, etc ..)
+

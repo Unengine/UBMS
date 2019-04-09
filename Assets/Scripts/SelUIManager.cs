@@ -105,7 +105,7 @@ public class SelUIManager : MonoBehaviour {
 		PrevBGMTime = MainBGM.time;
 		MainBGM.time = 125.8f;
 		string path = $"file://{BMSFileSystem.SelectedHeader.ParentPath}/{BMSFileSystem.SelectedHeader.StagefilePath}";
-		Debug.Log(path);
+	
 		Texture2D t = null;
 		if (path.EndsWith(".bmp", System.StringComparison.OrdinalIgnoreCase))
 		{

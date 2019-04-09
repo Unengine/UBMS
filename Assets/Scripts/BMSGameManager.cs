@@ -480,6 +480,7 @@ public class BMSGameManager : MonoBehaviour
 				((!IsBgaVideoSupported && Pat.BGAChanges.Count == 0) || (IsBgaVideoSupported && !Video.isPlaying)))
 			{
 				UI.ComboUpTxt("Game Set!");
+				Res.Accuracy = AccuracySum / Pat.NoteCount;
 				yield return Wait2Sec;
 				GameObject.Find("StartPanel").GetComponent<Animator>().Play("FadeInPanel");
 				yield return new WaitForSeconds(0.35f);
