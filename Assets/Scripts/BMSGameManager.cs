@@ -9,7 +9,7 @@ public class BMSGameManager : MonoBehaviour
 	public static BMSResult Res;
 	public static float Speed = 3f;
 	public static bool IsPaused;
-	public static bool WillSaveData = true;
+	public static bool WillSaveData;
 	public static bool IsAutoScr = true;
 	public bool IsAuto = false;
 	public double Scroll;
@@ -104,6 +104,7 @@ public class BMSGameManager : MonoBehaviour
 	private void Awake()
 	{
 		Application.runInBackground = true;
+		WillSaveData = true;
 		IsAuto = false;
 		IsPaused = true;
 		Pat = BMSParser.Instance.Pat;
@@ -315,9 +316,14 @@ public class BMSGameManager : MonoBehaviour
 		n.Model.SetActive(false);
 		l.NoteList.RemoveLast();
 
-		if (!IsScoreAdded) return;
-
 		JudgeType result = Judge.Judge(n, CurrentTime);
+		if(l.NoteList.Count > 0 && l.NoteList.Peek.Extra == 1 && result == JudgeType.POOR)
+		{
+			++HitCount;
+			l.NoteList.Peek.Model.SetActive(false);
+			l.NoteList.RemoveLast();
+		}
+		if (!IsScoreAdded) return;
 		if (n.Extra == 1 && result == JudgeType.IGNORE)
 		{
 			result = JudgeType.POOR;
@@ -457,7 +463,7 @@ public class BMSGameManager : MonoBehaviour
 			Res.Accuracy = AccuracySum / Pat.NoteCount;
 			return;
 		}
-		UI.UpdateScore(Res, Hp, Res.Accuracy = AccuracySum / HitCount);
+		UI.UpdateScore(Res, Hp, AccuracySum / HitCount);
 	}
 
 	public void ToggleAuto()

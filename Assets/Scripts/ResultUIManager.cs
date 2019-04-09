@@ -44,7 +44,7 @@ public class ResultUIManager : MonoBehaviour
 
 		if(BMSGameManager.WillSaveData)
 		{
-			string path = $"{Application.dataPath}/{Path.GetFileName(BMSGameManager.Header.Path)}.Result.json";
+			string path = $"{Application.dataPath}/{Path.GetFileName(BMSGameManager.Header.Title)}.Result.json";
 
 			if (File.Exists(path))
 			{

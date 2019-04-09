@@ -239,7 +239,7 @@ public class SelUIManager : MonoBehaviour {
 	{
 		if (header == null) return;
 
-		string path = $"{Application.dataPath}/{Path.GetFileName(header.Path)}.Result.json";
+		string path = $"{Application.dataPath}/{Path.GetFileName(header.Title)}.Result.json";
 		if (File.Exists(path))
 		{
 			JsonData data = JsonMapper.ToObject(File.ReadAllText(path));

@@ -123,6 +123,7 @@ GameObject:
   - component: {fileID: 51085586}
   - component: {fileID: 51085588}
   - component: {fileID: 51085587}
+  - component: {fileID: 51085589}
   m_Layer: 5
   m_Name: FSText
   m_TagString: Untagged
@@ -191,6 +192,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 51085585}
   m_CullTransparentMesh: 0
+--- !u!114 &51085589
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 51085585}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -900027084, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.49019608}
+  m_EffectDistance: {x: 1, y: -1}
+  m_UseGraphicAlpha: 1
 --- !u!1 &86760152
 GameObject:
   m_ObjectHideFlags: 0
@@ -3008,6 +3024,7 @@ GameObject:
   - component: {fileID: 1234902352}
   - component: {fileID: 1234902351}
   - component: {fileID: 1234902353}
+  - component: {fileID: 1234902354}
   m_Layer: 5
   m_Name: ComboText
   m_TagString: Untagged
@@ -3067,7 +3084,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: 
+  m_Text: '
+
+'
 --- !u!222 &1234902352
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3095,6 +3114,21 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &1234902354
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1234902349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -900027084, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.49019608}
+  m_EffectDistance: {x: 1, y: -1}
+  m_UseGraphicAlpha: 1
 --- !u!1 &1278451398
 GameObject:
   m_ObjectHideFlags: 0
