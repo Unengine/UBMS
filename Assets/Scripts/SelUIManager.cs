@@ -8,7 +8,7 @@ using LitJson;
 using B83.Image.BMP;
 
 public class SelUIManager : MonoBehaviour {
-
+	public static GaugeType Gauge = 0;
 	public static float ScrollValue = 1;
 	public static Dictionary<BMSSongInfo, AudioClip> PreviewClips;
 	public Scrollbar Scroll;
@@ -47,7 +47,8 @@ public class SelUIManager : MonoBehaviour {
 	private GameObject KeySetPanel;
 	[SerializeField]
 	private GameObject StageImg;
-
+	[SerializeField]
+	private Button GaugeButton;
 	[SerializeField]
 	private AudioSource Preview;
 	[SerializeField]
@@ -65,6 +66,12 @@ public class SelUIManager : MonoBehaviour {
 		Screen.SetResolution(1280, 720, true);
 		ScrToggle.isOn = BMSGameManager.IsAutoScr;
 		MainBGM.time = PrevBGMTime;
+		GaugeButton.onClick.AddListener(() =>
+		{
+			if (Gauge == GaugeType.EXHard) Gauge = GaugeType.Easy;
+			else Gauge = Gauge + 1;
+			GaugeButton.GetComponentInChildren<Text>().text = Gauge.ToString();
+		});
 	}
 	
 	// Update is called once per frame

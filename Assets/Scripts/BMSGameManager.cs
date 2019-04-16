@@ -40,6 +40,7 @@ public class BMSGameManager : MonoBehaviour
 	private int HitCount = 0;
 
 	public static BMSHeader Header;
+	private Gauge Gauge;
 	private JudgeManager Judge;
 	private BMSPattern Pat;
 	private SoundManager Sm;
@@ -127,6 +128,7 @@ public class BMSGameManager : MonoBehaviour
 		BMSFileSystem.SelectedPath = null;
 		UI.Bga.color = new Color(1, 1, 1, 0);
 		Wait2Sec = new WaitForSeconds(2.0f);
+		Gauge = new Gauge(SelUIManager.Gauge, Header.Total, Pat.NoteCount);
 		StartCoroutine(PreLoad());
 	}
 

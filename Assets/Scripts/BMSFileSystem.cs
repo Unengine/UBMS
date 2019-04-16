@@ -102,8 +102,8 @@ public class BMSFileSystem : MonoBehaviour {
 					}
 					else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#TOTAL", true) == 0)
 					{
-						double tot = 160;
-						double.TryParse(s.Substring(7), out tot);
+						float tot = 160;
+						float.TryParse(s.Substring(7), out tot);
 						header.Total = tot;
 					}
 					else if (s.Length >= 5 && string.Compare(s.Substring(0, 5), "#RANK", true) == 0) header.Rank = int.Parse(s.Substring(6));
