@@ -8,7 +8,7 @@ using LitJson;
 using B83.Image.BMP;
 
 public class SelUIManager : MonoBehaviour {
-	public static GaugeType Gauge = 0;
+	public static GaugeType Gauge = GaugeType.Easy;
 	public static float ScrollValue = 1;
 	public static Dictionary<BMSSongInfo, AudioClip> PreviewClips;
 	public Scrollbar Scroll;
@@ -68,7 +68,7 @@ public class SelUIManager : MonoBehaviour {
 		MainBGM.time = PrevBGMTime;
 		GaugeButton.onClick.AddListener(() =>
 		{
-			if (Gauge == GaugeType.EXHard) Gauge = GaugeType.Easy;
+			if (Gauge == GaugeType.Perfect) Gauge = GaugeType.Easy;
 			else Gauge = Gauge + 1;
 			GaugeButton.GetComponentInChildren<Text>().text = Gauge.ToString();
 		});
@@ -251,14 +251,18 @@ public class SelUIManager : MonoBehaviour {
 		{
 			JsonData data = JsonMapper.ToObject(File.ReadAllText(path));
 
+			int clearGauge = (int)data["ClearGauge"];
+			string clearStr = clearGauge == -1? "FAILED" : $"{(GaugeType)clearGauge} Cleared";
+
 			RecordText.text =
 				$"PGREAT : {((int)data["Pgr"]).ToString("D4")}\n" +
 				$"GREAT : {((int)data["Gr"]).ToString("D4")}\n" +
 				$"GOOD : {((int)data["Good"]).ToString("D4")}\n" +
 				$"BAD : {((int)data["Bad"]).ToString("D4")}\n" +
-				$"POOR : {((int)data["Poor"]).ToString("D4")}\n\n" +
+				$"POOR : {((int)data["Poor"]).ToString("D4")}\n" +
 				$"SCORE : {((int)data["Score"]).ToString("D4")}\n" +
-				$"ACCAURACY : {((double)data["Accuracy"]).ToString("P")}";
+				$"ACCAURACY : {((double)data["Accuracy"]).ToString("P")}\n" +
+				clearStr;
 		}
 		else
 			RecordText.text = "No Record!";

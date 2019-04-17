@@ -99,6 +99,7 @@ public class Stop : BMSObject
 
 public class BMSResult
 {
+	public int ClearGauge { get; set; } = -1;
 	public int NoteCount { get; set; }
 	public int Pgr { get; set; }
 	public int Gr { get; set; }
@@ -121,18 +122,20 @@ public enum GaugeType
 {
 	Easy,
 	Groove,
-	Hard,
-	EXHard
+	Survival,
+	EXSurvival,
+	MAXCombo,
+	Perfect
 }
 
 public class Gauge
 {
-	private readonly GaugeType Type;
+	public readonly GaugeType Type;
+	public readonly float GreatHealAmount;
+	public readonly float GoodHealAmount = 0;
+	public readonly float BadDamage;
+	public readonly float PoorDamage;
 	public float Hp { get; set; }
-	public float GreatHealAmount { get; set; }
-	public float GoodHealAmount { get; set; } = 0;
-	public float BadDamage { get; }
-	public float PoorDamage { get; }
 	public Gauge(GaugeType type, float total, int noteCount)
 	{
 		Type = type;
@@ -151,22 +154,38 @@ public class Gauge
 			GreatHealAmount = total / noteCount * 1.2f;
 			GoodHealAmount = GreatHealAmount / 2;
 			BadDamage = 0.032f;
-			PoorDamage = 0.08f;
+			PoorDamage = 0.048f;
 		}
-		else if(type == GaugeType.Hard)
+		else if(type == GaugeType.Survival)
 		{
-			Hp = 1;
+			Hp = 1.0f;
 			GreatHealAmount = 0.1f;
 			BadDamage = 0.06f;
 			PoorDamage = 0.1f;
 		}
-		else if(type == GaugeType.EXHard)
+		else if(type == GaugeType.EXSurvival)
 		{
-			Hp = 1;
+			Hp = 1.0f;
 			GreatHealAmount = 0.1f;
 			BadDamage = 0.1f;
 			PoorDamage = 0.18f;
 		}
+		else if (type == GaugeType.MAXCombo)
+		{
+			Hp = 1.0f;
+			GreatHealAmount = 0.0f;
+			BadDamage = 1.0f;
+			PoorDamage = 1.0f;
+		}
+		else if (type == GaugeType.Perfect)
+		{
+			Hp = 1.0f;
+			GreatHealAmount = 0.0f;
+			GoodHealAmount = -100.0f;
+			BadDamage = 1.0f;
+			PoorDamage = 1.0f;
+		}
+
 		GreatHealAmount /= 100;
 		GoodHealAmount /= 100;
 	}

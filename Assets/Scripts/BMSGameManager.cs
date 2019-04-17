@@ -47,7 +47,6 @@ public class BMSGameManager : MonoBehaviour
 	private WaitForSeconds Wait2Sec;
 	private KeyCode[] Keys;
 	private double CurrentBPM;
-	private float Hp = 1;
 	private int Combo = 0;
 	private bool IsBgaVideoSupported = false;
 
@@ -55,12 +54,14 @@ public class BMSGameManager : MonoBehaviour
 	{
 		BMSParser.Instance.Parse();
 		Pat = BMSParser.Instance.Pat;
+		Pat.GetBeatsAndTimings();
+		Gauge = new Gauge(SelUIManager.Gauge, Header.Total, Pat.NoteCount);
+		UI.UpdateScore(Res, Gauge.Hp, 0.0f);
 		UI.UpdateComboText("Loading...");
 		UI.LoadBackBmp();
 		UI.Bga.rectTransform.sizeDelta = new Vector2(298, 349);
 		Sm.AddAudioClips();
 		UI.LoadImages();
-		Pat.GetBeatsAndTimings();
 		Res.NoteCount = Pat.NoteCount;
 		Drawer.DrawNotes();
 		CurrentBPM = Pat.Bpms.Peek.Bpm;
@@ -128,7 +129,6 @@ public class BMSGameManager : MonoBehaviour
 		BMSFileSystem.SelectedPath = null;
 		UI.Bga.color = new Color(1, 1, 1, 0);
 		Wait2Sec = new WaitForSeconds(2.0f);
-		Gauge = new Gauge(SelUIManager.Gauge, Header.Total, Pat.NoteCount);
 		StartCoroutine(PreLoad());
 	}
 
@@ -428,44 +428,44 @@ public class BMSGameManager : MonoBehaviour
 			AccuracySum += 1;
 			Res.Score += 2;
 			++Res.Pgr;
-			Hp += (float)Header.Total / 100 / Pat.NoteCount;
-			if (Hp > 1) Hp = 1;
+			Gauge.Hp += Gauge.GreatHealAmount;
+			if (Gauge.Hp > 1) Gauge.Hp = 1;
 		}
 		else if (judge == JudgeType.GREAT)
 		{
 			AccuracySum += 0.8;
 			Res.Score += 1;
 			++Res.Gr;
-			Hp += (float)Header.Total / 100 / Pat.NoteCount;
-			if (Hp > 1) Hp = 1;
+			Gauge.Hp += Gauge.GreatHealAmount;
+			if (Gauge.Hp > 1) Gauge.Hp = 1;
 		}
 		else if (judge == JudgeType.GOOD)
 		{
 			AccuracySum += 0.5;
 			++Res.Good;
-			Hp += (float)Header.Total / 200 / Pat.NoteCount;
-			if (Hp > 1) Hp = 1;
+			Gauge.Hp += Gauge.GoodHealAmount;
+			if (Gauge.Hp > 1) Gauge.Hp = 1;
 		}
 		else if (judge == JudgeType.BAD)
 		{
 			++Res.Bad;
-			Hp -= 0.02f;
-			if (Hp < 0) Hp = 0;
+			Gauge.Hp -= Gauge.BadDamage;
+			if (Gauge.Hp < 0) Gauge.Hp = 0;
 		}
 		else
 		{
 			++Res.Poor;
-			Hp -= 0.04f;
-			if (Hp < 0) Hp = 0;
+			Gauge.Hp -= Gauge.PoorDamage;
+			if (Gauge.Hp < 0) Gauge.Hp = 0;
 		}
-
-		if (Hp <= 0)
+		
+		if (Gauge.Type >= GaugeType.Survival && Gauge.Hp <= 0)
 		{
 			UnityEngine.SceneManagement.SceneManager.LoadScene(2);
 			Res.Accuracy = AccuracySum / Pat.NoteCount;
 			return;
 		}
-		UI.UpdateScore(Res, Hp, AccuracySum / HitCount);
+		UI.UpdateScore(Res, Gauge.Hp, AccuracySum / HitCount);
 	}
 
 	public void ToggleAuto()
@@ -483,6 +483,8 @@ public class BMSGameManager : MonoBehaviour
 			{
 				UI.ComboUpTxt("Game Set!");
 				Res.Accuracy = AccuracySum / Pat.NoteCount;
+				if ((Gauge.Type <= GaugeType.Groove && Gauge.Hp >= 0.8f) || Gauge.Type >= GaugeType.Survival)
+					Res.ClearGauge = (int)Gauge.Type;
 				yield return Wait2Sec;
 				GameObject.Find("StartPanel").GetComponent<Animator>().Play("FadeInPanel");
 				yield return new WaitForSeconds(0.35f);

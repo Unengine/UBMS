@@ -19,6 +19,10 @@ public class ResultUIManager : MonoBehaviour
 
 	private void DrawResults()
 	{
+		string clearStr = (BMSGameManager.Res.ClearGauge == -1) ? "FAILED" :
+			$"{(GaugeType)BMSGameManager.Res.ClearGauge} Cleared"
+			;
+
 		Statistics.text =
 			$"NOTECOUNT : {BMSGameManager.Res.NoteCount.ToString("D4")}\n" +
 			$"PGREAT : {BMSGameManager.Res.Pgr.ToString("D4")}\n" +
@@ -27,7 +31,9 @@ public class ResultUIManager : MonoBehaviour
 			$"BAD : {BMSGameManager.Res.Bad.ToString("D4")}\n" +
 			$"POOR : {BMSGameManager.Res.Poor.ToString("D4")}\n\n" +
 			$"SCORE : {BMSGameManager.Res.Score.ToString("D4")}\n" +
-			$"ACCURACY : {BMSGameManager.Res.Accuracy.ToString("P")}";
+			$"ACCURACY : {BMSGameManager.Res.Accuracy.ToString("P")}\n" +
+			clearStr
+			;
 
 
 		double ratio = BMSGameManager.Res.Score / (double)(BMSGameManager.Res.NoteCount * 2);
