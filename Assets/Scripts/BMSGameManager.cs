@@ -56,6 +56,7 @@ public class BMSGameManager : MonoBehaviour
 		Pat = BMSParser.Instance.Pat;
 		Pat.GetBeatsAndTimings();
 		Gauge = new Gauge(SelUIManager.Gauge, Header.Total, Pat.NoteCount);
+		UI.SetHPBarSprite(Gauge.Type);
 		UI.UpdateScore(Res, Gauge.Hp, 0.0f);
 		UI.UpdateComboText("Loading...");
 		UI.LoadBackBmp();

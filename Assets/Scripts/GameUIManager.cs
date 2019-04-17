@@ -27,6 +27,13 @@ public class GameUIManager : MonoBehaviour
 	private Text ComboText;
 	[SerializeField]
 	private Image StartPanel;
+	[SerializeField]
+	private Sprite GrooveSprite;
+	[SerializeField]
+	private Sprite SurvSprite;
+	[SerializeField]
+	private Sprite ExSurvSprite;
+
 
 	private Animator ComboAnim;
 
@@ -36,6 +43,17 @@ public class GameUIManager : MonoBehaviour
 		BGImageTable = new Dictionary<string, string>();
 		BGSprites = new Dictionary<string, Texture2D>();
 		ComboAnim = ComboText.GetComponent<Animator>();
+
+	}
+
+	public void SetHPBarSprite(GaugeType type)
+	{
+		Sprite sprite;
+
+		if (type <= GaugeType.Groove) sprite = GrooveSprite;
+		else if (type <= GaugeType.Survival) sprite = SurvSprite;
+		else sprite = ExSurvSprite;
+		GameObject.Find("Fill").GetComponent<Image>().sprite = sprite;
 	}
 
 	public void LoadBackBmp()
