@@ -3,7 +3,7 @@
 Unity BMS player. Supports modern bmses.
 
 
-[Download currently executable binary](https://drive.google.com/open?id=1-lwr0RRVI6wYmisHqZzlVLvPNVDXqsPC)
+[Download currently executable binary](https://github.com/Unengine/UBMS/releases/tag/v1.3.2-alpha)
 
 [Quicktime](https://support.apple.com/kb/DL837?locale=ko_KR) should be installed to play video bga.
 
