@@ -53,9 +53,10 @@ CHANNELS
 
 ## TODO Priority
 
-· Judgeline adjusting
-
 · 2P/DP Play
 
-· Gauges (Groove, Hard Survival, etc ..)
+· Improve UI
 
+· Custom Skin (Very-Low Priority)
+
+· Internet Ranking (Very-Low Priority)
