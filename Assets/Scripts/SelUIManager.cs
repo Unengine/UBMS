@@ -66,6 +66,7 @@ public class SelUIManager : MonoBehaviour {
 		Screen.SetResolution(1280, 720, true);
 		ScrToggle.isOn = BMSGameManager.IsAutoScr;
 		MainBGM.time = PrevBGMTime;
+		GaugeButton.GetComponentInChildren<Text>().text = Gauge.ToString();
 		GaugeButton.onClick.AddListener(() =>
 		{
 			if (Gauge == GaugeType.Perfect) Gauge = GaugeType.Easy;

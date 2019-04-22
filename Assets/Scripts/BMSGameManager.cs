@@ -7,6 +7,7 @@ using UnityEngine.Video;
 public class BMSGameManager : MonoBehaviour
 {
 	public static BMSResult Res;
+	public static int JudgeAdjValue = 0;
 	public static float Speed = 3f;
 	public static bool IsPaused;
 	public static bool WillSaveData;
@@ -100,6 +101,7 @@ public class BMSGameManager : MonoBehaviour
 		UI.Bga.color = Color.white;
 		UI.Bga.rectTransform.sizeDelta = new Vector2(600, 600);
 		StartCoroutine(CheckIfSongEnded());
+		CurrentTime += (JudgeAdjValue / 1000.0f);
 		IsPaused = false;
 	}
 
@@ -107,7 +109,7 @@ public class BMSGameManager : MonoBehaviour
 	private void Awake()
 	{
 		Application.runInBackground = true;
-		WillSaveData = true;
+		WillSaveData = !IsAutoScr;
 		IsAuto = false;
 		IsPaused = true;
 		Pat = BMSParser.Instance.Pat;
@@ -462,6 +464,7 @@ public class BMSGameManager : MonoBehaviour
 		
 		if (Gauge.Type >= GaugeType.Survival && Gauge.Hp <= 0)
 		{
+			WillSaveData = false;
 			UnityEngine.SceneManagement.SceneManager.LoadScene(2);
 			Res.Accuracy = AccuracySum / Pat.NoteCount;
 			return;
@@ -486,6 +489,8 @@ public class BMSGameManager : MonoBehaviour
 				Res.Accuracy = AccuracySum / Pat.NoteCount;
 				if ((Gauge.Type <= GaugeType.Groove && Gauge.Hp >= 0.8f) || Gauge.Type >= GaugeType.Survival)
 					Res.ClearGauge = (int)Gauge.Type;
+				else WillSaveData = false;
+
 				yield return Wait2Sec;
 				GameObject.Find("StartPanel").GetComponent<Animator>().Play("FadeInPanel");
 				yield return new WaitForSeconds(0.35f);
