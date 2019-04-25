@@ -80,7 +80,6 @@ public class KeySettingManager : MonoBehaviour
 		else
 		{
 			PlayerPrefs.SetInt("KeySet", 1);
-
 			PlayerPrefs.SetInt("LSUp", (int)KeyCode.LeftShift);
 			PlayerPrefs.SetInt("LSDown", (int)KeyCode.LeftControl);
 			PlayerPrefs.SetInt("L1", (int)KeyCode.S);
