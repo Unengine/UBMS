@@ -44,4 +44,12 @@ public class BMSMultiChannelAudioSource : MonoBehaviour
 			break;
 		}
 	}
+
+	public bool IsPlayingSound()
+	{
+		foreach (AudioSource source in AudioSources)
+			if (source.isPlaying)
+				return true;
+		return false;
+	}
 }

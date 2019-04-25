@@ -484,7 +484,7 @@ public class BMSGameManager : MonoBehaviour
 	{
 		while(true)
 		{
-			if (HitCount == Pat.NoteCount &&
+			if (HitCount >= Pat.NoteCount &&
 				((!IsBgaVideoSupported && Pat.BGAChanges.Count == 0) || (IsBgaVideoSupported && !Video.isPlaying)))
 			{
 				UI.ComboUpTxt("Game Set!");
@@ -494,10 +494,10 @@ public class BMSGameManager : MonoBehaviour
 				else WillSaveData = false;
 				break;
 			}
-
 			yield return Wait2Sec;
 		}
 
+		yield return new WaitWhile(() => Sm.IsSoundPlaying);
 		yield return Wait2Sec;
 		GameObject.Find("StartPanel").GetComponent<Animator>().Play("FadeInPanel");
 		yield return new WaitForSeconds(0.35f);

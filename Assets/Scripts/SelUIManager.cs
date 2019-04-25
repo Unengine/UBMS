@@ -111,8 +111,10 @@ public class SelUIManager : MonoBehaviour {
 
 	public IEnumerator GameStart()
 	{
+		BMSGameManager.IsBgaOn = !BgaToggle.isOn;
 		IsChanging = true;	//block all
 		Preview.Stop();
+		MainBGM.Play();
 		PrevBGMTime = MainBGM.time;
 		MainBGM.time = 125.8f;
 		string path = $"file://{BMSFileSystem.SelectedHeader.ParentPath}/{BMSFileSystem.SelectedHeader.StagefilePath}";
@@ -412,6 +414,4 @@ public class SelUIManager : MonoBehaviour {
 		}
 		KeySetPanel.SetActive(false);
 	}
-
-	public void ToggleBGAOnOff() => BMSGameManager.IsBgaOn = !BMSGameManager.IsBgaOn;
 }

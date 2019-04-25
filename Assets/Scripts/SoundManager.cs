@@ -7,11 +7,18 @@ using UnityEngine.Networking;
 public class SoundManager : MonoBehaviour {
 
 	public bool IsPrepared { get; set; } = false;
-    public GameObject KeySoundObject;
-    public MultiChannelAudioSource mulChannel;
-	public BMSMultiChannelAudioSource Src;
-    public Dictionary<int, string> Pathes { get; set; }
+	public GameObject KeySoundObject;
+	//public MultiChannelAudioSource mulChannel;
+	public Dictionary<int, string> Pathes { get; set; }
 	public Dictionary<int, AudioClip> Clips { get; set; }
+
+	[SerializeField]
+	private BMSMultiChannelAudioSource Src;
+
+	public bool IsSoundPlaying
+	{
+		get => Src.IsPlayingSound();
+	}
 
 	private static string[] SoundExtensions;
 
@@ -30,9 +37,9 @@ public class SoundManager : MonoBehaviour {
 		StartCoroutine(CAddAudioClips());
 	}
 
-    // Use this for initialization
-    private IEnumerator CAddAudioClips()
-    {
+	// Use this for initialization
+	private IEnumerator CAddAudioClips()
+	{
 		int extensionFailCount;
 		foreach (KeyValuePair<int, string> p in Pathes)
 		{
@@ -52,7 +59,8 @@ public class SoundManager : MonoBehaviour {
 			else if (string.Compare(SoundExtensions[extensionFailCount], ".mp3", true) == 0) type = AudioType.MPEG;
 
 			www = UnityWebRequestMultimedia.GetAudioClip(
-				"file://" + url + UnityWebRequest.EscapeURL(p.Value + SoundExtensions[extensionFailCount]).Replace('+', ' '), type);
+				"file://" + url + UnityWebRequest.EscapeURL(p.Value + SoundExtensions[extensionFailCount])
+				.Replace('+', ' ').Replace("%2b", "+"), type);
 			yield return www.SendWebRequest();
 
 			if (www.downloadHandler.data.Length != 0)
@@ -68,13 +76,12 @@ public class SoundManager : MonoBehaviour {
 		}
 
 		IsPrepared = true;
-    }
+	}
 
-    public void PlayKeySound(int key, float volume = 1.0f)
-    {
+	public void PlayKeySound(int key, float volume = 1.0f)
+	{
 		if (key == 0) return;
 		if (Clips.ContainsKey(key))
 			Src.PlayOneShot(Clips[key], volume);
-    }
-
+	}
 }

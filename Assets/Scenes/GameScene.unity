@@ -1191,7 +1191,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c7b8bfdb97416b46aa3193babfe790a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Sm: {fileID: 0}
+  Sm: {fileID: 519420033}
   GameUI: {fileID: 1551605157}
 --- !u!20 &519420031
 Camera:
@@ -1277,7 +1277,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   KeySoundObject: {fileID: 86760152}
-  mulChannel: {fileID: 0}
   Src: {fileID: 1191581263}
 --- !u!82 &519420034
 AudioSource:
