@@ -50,7 +50,9 @@ public class ResultUIManager : MonoBehaviour
 
 		if(BMSGameManager.WillSaveData)
 		{
-			string path = $"{Application.dataPath}/{Path.GetFileName(BMSGameManager.Header.Title)}.Result.json";
+			BMSHeader header = BMSGameManager.Header;
+			string name = header.Path.Substring(header.Path.IndexOf("BMSFiles") + 9).Replace('\\', '_');
+			string path = $"{Application.dataPath}/{name}.Result.json";
 
 			if (File.Exists(path))
 			{

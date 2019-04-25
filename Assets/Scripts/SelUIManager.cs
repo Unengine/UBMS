@@ -54,6 +54,8 @@ public class SelUIManager : MonoBehaviour {
 	[SerializeField]
 	private AudioSource MainBGM;
 	private GameObject[] PatternButtons;
+	[SerializeField]
+	private Toggle BgaToggle;
 	private static float PrevBGMTime = 0;
 	private bool IsReady = false;
 
@@ -73,6 +75,7 @@ public class SelUIManager : MonoBehaviour {
 			else Gauge = Gauge + 1;
 			GaugeButton.GetComponentInChildren<Text>().text = Gauge.ToString();
 		});
+		BgaToggle.isOn = !BMSGameManager.IsBgaOn;
 	}
 	
 	// Update is called once per frame
@@ -227,7 +230,8 @@ public class SelUIManager : MonoBehaviour {
 		UnityWebRequest www = UnityWebRequestTexture.GetTexture(path);
 		yield return www.SendWebRequest();
 		Texture t = null;
-		if (path.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase)) t = DownloadHandlerTexture.GetContent(www);
+		if (path.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase) ||
+			path.EndsWith(".jpg", System.StringComparison.OrdinalIgnoreCase)) t = DownloadHandlerTexture.GetContent(www);
 		else if (path.EndsWith(".bmp", System.StringComparison.OrdinalIgnoreCase))
 		{
 			B83.Image.BMP.BMPLoader loader = new B83.Image.BMP.BMPLoader();
@@ -247,7 +251,8 @@ public class SelUIManager : MonoBehaviour {
 	{
 		if (header == null) return;
 
-		string path = $"{Application.dataPath}/{Path.GetFileName(header.Title)}.Result.json";
+		string name = header.Path.Substring(header.Path.IndexOf("BMSFiles") + 9).Replace('\\', '_');
+		string path = $"{Application.dataPath}/{name}.Result.json";
 		if (File.Exists(path))
 		{
 			JsonData data = JsonMapper.ToObject(File.ReadAllText(path));
@@ -407,4 +412,6 @@ public class SelUIManager : MonoBehaviour {
 		}
 		KeySetPanel.SetActive(false);
 	}
+
+	public void ToggleBGAOnOff() => BMSGameManager.IsBgaOn = !BMSGameManager.IsBgaOn;
 }

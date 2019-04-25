@@ -76,7 +76,7 @@ public class BMSFileSystem : MonoBehaviour {
 					else if (s.Length >= 8 && string.Compare(s.Substring(0, 8), "#BACKBMP", true) == 0) header.BackbmpPath = s.Substring(9);
 					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#PLAYER", true) == 0) header.Player = s[8] - '0';
 					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#ARTIST", true) == 0) header.Artist = s.Substring(8);
-					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#BANNER", true) == 0) header.BannerPath = s.Substring(8);
+					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#BANNER", true) == 0) header.BannerPath = s.Split(' ')[1];
 					else if (s.Length >= 7 && string.Compare(s.Substring(0, 7), "#LNTYPE", true) == 0) header.LnType |= (Lntype)(1 << (s[8] - '0'));
 					else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#GENRE", true) == 0) header.Genre = s.Substring(7);
 					else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#TITLE", true) == 0)

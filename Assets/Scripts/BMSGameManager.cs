@@ -7,6 +7,7 @@ public class BMSGameManager : MonoBehaviour
 	public static BMSResult Res;
 	public static int JudgeAdjValue = 0;
 	public static float Speed = 3f;
+	public static bool IsBgaOn = true;
 	public static bool IsPaused;
 	public static bool WillSaveData;
 	public static bool IsAutoScr = true;
@@ -61,15 +62,16 @@ public class BMSGameManager : MonoBehaviour
 		UI.LoadBackBmp();
 		UI.Bga.rectTransform.sizeDelta = new Vector2(298, 349);
 		Sm.AddAudioClips();
-		UI.LoadImages();
 		Res.NoteCount = Pat.NoteCount;
 		Drawer.DrawNotes();
 		CurrentBPM = Pat.Bpms.Peek.Bpm;
 		Pat.Bpms.RemoveLast();
 		UI.UpdateBPMText(CurrentBPM);
 
-		if (Video.isActiveAndEnabled)
+		if (IsBgaOn)
 		{
+			UI.LoadImages();
+
 			for (int i = Pat.BGAChanges.Count - 1; i > -1; --i)
 			{
 				if (!Pat.BGAChanges[i].IsPic)
@@ -88,16 +90,19 @@ public class BMSGameManager : MonoBehaviour
 				Debug.Log("Video Prepared");
 				IsBgaVideoSupported = !errorFlag;
 			}
+			yield return new WaitUntil(() => UI.IsPrepared);
 		}
-		yield return new WaitUntil(() => UI.IsPrepared);
 		yield return new WaitUntil(() => Sm.IsPrepared);
 		Debug.Log("Game starts in 2 sec");
 		UI.ComboUpTxt("Game Start!");
 		yield return Wait2Sec;
 		UI.UpdateComboText(string.Empty);
-		UI.Bga.texture = Video.texture;
-		UI.Bga.color = Color.white;
-		UI.Bga.rectTransform.sizeDelta = new Vector2(600, 600);
+		if (IsBgaOn && IsBgaVideoSupported)
+		{
+			UI.Bga.texture = Video.texture;
+			UI.Bga.color = Color.white;
+			UI.Bga.rectTransform.sizeDelta = new Vector2(600, 600);
+		}
 		StartCoroutine(CheckIfSongEnded());
 		CurrentTime += (JudgeAdjValue / 1000.0f);
 		IsPaused = false;
@@ -487,15 +492,15 @@ public class BMSGameManager : MonoBehaviour
 				if ((Gauge.Type <= GaugeType.Groove && Gauge.Hp >= 0.8f) || Gauge.Type >= GaugeType.Survival)
 					Res.ClearGauge = (int)Gauge.Type;
 				else WillSaveData = false;
-
-				yield return Wait2Sec;
-				GameObject.Find("StartPanel").GetComponent<Animator>().Play("FadeInPanel");
-				yield return new WaitForSeconds(0.35f);
-				UnityEngine.SceneManagement.SceneManager.LoadScene(2);
 				break;
 			}
 
 			yield return Wait2Sec;
 		}
+
+		yield return Wait2Sec;
+		GameObject.Find("StartPanel").GetComponent<Animator>().Play("FadeInPanel");
+		yield return new WaitForSeconds(0.35f);
+		UnityEngine.SceneManagement.SceneManager.LoadScene(2);
 	}
 }
