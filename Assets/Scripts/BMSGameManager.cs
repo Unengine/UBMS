@@ -1,6 +1,4 @@
 ﻿using System.Collections;
-using System.IO;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Video;
 
@@ -108,7 +106,6 @@ public class BMSGameManager : MonoBehaviour
 	// Use this for initialization
 	private void Awake()
 	{
-		Application.runInBackground = true;
 		WillSaveData = !IsAutoScr;
 		IsAuto = false;
 		IsPaused = true;
@@ -482,7 +479,7 @@ public class BMSGameManager : MonoBehaviour
 	{
 		while(true)
 		{
-			if (HitCount == Pat.NoteCount &&
+			if (HitCount >= Pat.NoteCount &&
 				((!IsBgaVideoSupported && Pat.BGAChanges.Count == 0) || (IsBgaVideoSupported && !Video.isPlaying)))
 			{
 				UI.ComboUpTxt("Game Set!");
@@ -495,7 +492,7 @@ public class BMSGameManager : MonoBehaviour
 				GameObject.Find("StartPanel").GetComponent<Animator>().Play("FadeInPanel");
 				yield return new WaitForSeconds(0.35f);
 				UnityEngine.SceneManagement.SceneManager.LoadScene(2);
-				break;
+				yield break;
 			}
 
 			yield return Wait2Sec;
