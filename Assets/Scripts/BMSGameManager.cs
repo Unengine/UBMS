@@ -1,6 +1,4 @@
 ﻿using System.Collections;
-using System.IO;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Video;
 
@@ -108,7 +106,6 @@ public class BMSGameManager : MonoBehaviour
 	// Use this for initialization
 	private void Awake()
 	{
-		Application.runInBackground = true;
 		WillSaveData = !IsAutoScr;
 		IsAuto = false;
 		IsPaused = true;
