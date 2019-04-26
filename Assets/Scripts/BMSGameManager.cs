@@ -334,7 +334,7 @@ public class BMSGameManager : MonoBehaviour
 		if (n.Extra == 1 && result == JudgeType.IGNORE)
 		{
 			result = JudgeType.POOR;
-			++HitCount;
+			//++HitCount;
 			n.Model.SetActive(false);
 			l.NoteList.RemoveLast();
 		}
