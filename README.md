@@ -55,7 +55,9 @@ CHANNELS
 
 · 2P/DP Play
 
-· Improve UI
+· Improving UI
+
+· Command Line Execution
 
 · Custom Skin (Very-Low Priority)
 
