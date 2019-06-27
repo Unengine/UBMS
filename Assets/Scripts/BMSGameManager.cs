@@ -87,6 +87,7 @@ public class BMSGameManager : MonoBehaviour
 				Video.errorReceived += (a, b) => errorFlag = true;
 				Video.Prepare();
 				yield return new WaitUntil(() => (Video.isPrepared || errorFlag));
+				UI.SetVideoRatio();
 				Debug.Log("Video Prepared");
 				IsBgaVideoSupported = !errorFlag;
 			}

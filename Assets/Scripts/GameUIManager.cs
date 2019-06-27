@@ -8,6 +8,7 @@ using UnityEngine.Networking;
 
 public class GameUIManager : MonoBehaviour
 {
+	public float YRatio { get; set; } = 1;
 	public bool IsPrepared { get; set; } = false;
 	public RawImage Bga;
 	public Dictionary<string, string> BGImageTable { get; set; }
@@ -33,6 +34,8 @@ public class GameUIManager : MonoBehaviour
 	private Sprite SurvSprite;
 	[SerializeField]
 	private Sprite ExSurvSprite;
+	[SerializeField]
+	private RawImage BGAVideoImage;
 
 
 	private Animator ComboAnim;
@@ -43,7 +46,15 @@ public class GameUIManager : MonoBehaviour
 		BGImageTable = new Dictionary<string, string>();
 		BGSprites = new Dictionary<string, Texture2D>();
 		ComboAnim = ComboText.GetComponent<Animator>();
+	}
 
+	public void SetVideoRatio()
+	{
+		BGAVideoImage.transform.localScale = new Vector3(1, YRatio, 1);
+		if (YRatio != 1.0f)
+		{
+			YRatio = 1.0f;
+		}
 	}
 
 	public void SetHPBarSprite(GaugeType type)

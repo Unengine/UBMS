@@ -72,12 +72,20 @@ public class BMSParser : MonoBehaviour {
 				Header.Lnobj = Decode36(s.Substring(7, 2));
 				Header.LnType |= Lntype.LNOBJ;
 			}
+			else if (s.Length >= 6 && string.Compare(s.Substring(0, 6), "#RATIO", true) == 0)
+			{
+				GameUI.YRatio = float.Parse(s.Substring(7));
+			}
 			else if (s.Length >= 6 && string.Compare(s.Substring(0, 4), "#BMP", true) == 0)
 			{
 				string key = s.Substring(4, 2);
 				string extend = s.Substring(s.Length - 3, 3);
 				string Path = s.Substring(7, s.Length - 7);
 				if (string.Compare(extend, "mpg", true) == 0)
+				{
+					Pat.BGVideoTable.Add(key, Path);
+				}
+				else if (string.Compare(extend, "mp4", true) == 0)
 				{
 					Pat.BGVideoTable.Add(key, Path);
 				}
