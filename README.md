@@ -1,3 +1,5 @@
+[Huge refactor will be done later.](https://github.com/Unengine/UBMS/issues/3)
+
 # UBMS (Unity-BMS)
 
 Unity BMS player. Supports modern bmses.
