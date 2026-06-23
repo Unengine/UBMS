@@ -1,4 +1,8 @@
-[Huge refactor will be done later.](https://github.com/Unengine/UBMS/issues/3)
+# NOTE : This project is no longer maintained.
+
+Since plenty of multiplatform BMS clients are present in 2026, I have decided to sunset this project.
+
+Thank you for all your support over the years.
 
 # UBMS (Unity-BMS)
 
